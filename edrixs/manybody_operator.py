@@ -249,6 +249,7 @@ def build_opers(nfermion, coeff, lb, rb=None, tol=1E-10):
             hmat = two_fermion(coeff, lb, rb, tol)
         else:
             tot = np.prod(dim[0:-2])
+            # These steps are heavy...
             hmat_tmp = np.zeros((tot, nl, nr), dtype=complex)
             coeff_tmp = coeff.reshape((tot, dim[-2], dim[-1]))
             for i in range(tot):

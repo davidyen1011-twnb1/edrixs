@@ -1,3 +1,6 @@
+The fastest way to rebuild the new python scripts
+pip install -v .
+
 ===============================
 edrixs
 ===============================

@@ -1,17 +1,27 @@
 !!>>> read control parameters
-subroutine config()
+subroutine config(folder)
     use m_constants, only: mystd, mytmp
     use m_control
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
-    integer :: ierror 
+    integer :: ierror
+    character(len=30) :: folder_
 
     namelist /control/ ed_solver, num_val_orbs, num_core_orbs, neval, nvector, &
                        idump, num_gs, maxiter, linsys_max, min_ndim, ncv, &
                        eigval_tol, linsys_tol, nkryl, omega_in, gamma_in
+    
+    ! Specify folder
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     ! default values
     ed_solver = 1
@@ -32,14 +42,14 @@ subroutine config()
     gamma_in = 0.1
 
     exists = .false.
-    inquire(file = 'config.in', exist = exists)
+    inquire(file = trim(folder_)//'config.in', exist = exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: config.in doesn't exist"
         STOP
     endif
 
     if (origin_myid == master) then
-        open(mytmp, file='config.in')            
+        open(mytmp, file=trim(folder_)//'config.in')            
         read(mytmp, NML=control) 
         close(mytmp)
     endif
@@ -67,7 +77,7 @@ subroutine config()
 end subroutine config
 
 !!>>> read hopping terms for initial configuration
-subroutine read_hopping_i()
+subroutine read_hopping_i(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, nhopp_i
     use m_global,    only: hopping_i, alloc_hopping_i
@@ -75,21 +85,30 @@ subroutine read_hopping_i()
 
     implicit none
 
+    character(*), intent(in), optional :: folder
+
     logical :: exists
     integer :: i, j
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=30) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "hopping_i.in", exist=exists)
+    inquire(file = trim(folder_)//"hopping_i.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: hopping_i.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="hopping_i.in")
+        open(mytmp, file=trim(folder_)//"hopping_i.in")
         read(mytmp, *) nhopp_i
         call alloc_hopping_i()
         do num=1,nhopp_i
@@ -117,29 +136,38 @@ subroutine read_hopping_i()
 end subroutine read_hopping_i
 
 !!>>> read Coulomb interaction terms for initial configuration
-subroutine read_coulomb_i()
+subroutine read_coulomb_i(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, ncoul_i
     use m_global,    only: coulomb_i, alloc_coulomb_i
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: i, j, k, l
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=30) :: folder_
 
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
+    
     exists = .false.
-    inquire(file = "coulomb_i.in", exist=exists)
+    inquire(file = trim(folder_)//"coulomb_i.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: coulomb_i.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="coulomb_i.in")
+        open(mytmp, file=trim(folder_)//"coulomb_i.in")
         read(mytmp, *) ncoul_i 
         call alloc_coulomb_i()
         do num=1,ncoul_i
@@ -171,19 +199,28 @@ subroutine read_coulomb_i()
 end subroutine read_coulomb_i
 
 !!>>> read fock basis for initial configuration
-subroutine read_fock_i()
+subroutine read_fock_i(folder)
     use m_constants, only: mystd, mytmp
     use m_control,   only: ndim_i
     use m_global,    only: fock_i, alloc_fock_i
 
     implicit none
 
+    character(*), intent(in), optional :: folder
+    
     logical :: exists
     integer :: num
+    character(len=30) :: folder_
 
-    inquire(file = "fock_i.in", exist=exists)
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
+
+    inquire(file = trim(folder_)//"fock_i.in", exist=exists)
     if (exists .eqv. .true.) then
-        open(mytmp, file="fock_i.in")
+        open(mytmp, file=trim(folder_)//"fock_i.in")
         read(mytmp, *) ndim_i
         call alloc_fock_i()
         do num=1,ndim_i
@@ -199,13 +236,15 @@ subroutine read_fock_i()
 end subroutine read_fock_i
 
 !!>>> read hopping terms for intermediate configuration
-subroutine read_hopping_n()
+subroutine read_hopping_n(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, nhopp_n
     use m_global,    only: hopping_n, alloc_hopping_n
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     ! local variables
     logical :: exists
@@ -213,16 +252,23 @@ subroutine read_hopping_n()
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=30) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "hopping_n.in", exist=exists)
+    inquire(file = trim(folder_)//"hopping_n.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: hopping_n.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="hopping_n.in")
+        open(mytmp, file=trim(folder_)//"hopping_n.in")
         read(mytmp, *) nhopp_n
         call alloc_hopping_n()
         do num=1,nhopp_n
@@ -250,29 +296,38 @@ subroutine read_hopping_n()
 end subroutine read_hopping_n
 
 !!>>> read Coulomb interaction terms for intermediate configuration
-subroutine read_coulomb_n()
+subroutine read_coulomb_n(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, ncoul_n
     use m_global,    only: coulomb_n, alloc_coulomb_n
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: i, j, k, l
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=30) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "coulomb_n.in", exist=exists)
+    inquire(file = trim(folder_)//"coulomb_n.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: coulomb_n.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="coulomb_n.in")
+        open(mytmp, file=trim(folder_)//"coulomb_n.in")
         read(mytmp, *) ncoul_n
         call alloc_coulomb_n()
         do num=1,ncoul_n
@@ -305,19 +360,28 @@ end subroutine read_coulomb_n
 
 !! read fock basis for intermediate states
 !! without including the degree of freedom of core orbitals
-subroutine read_fock_n()
+subroutine read_fock_n(folder)
     use m_constants, only: mystd, mytmp
     use m_control,   only: ndim_n_nocore
     use m_global,    only: fock_n, alloc_fock_n
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: num
+    character(len=30) :: folder_
 
-    inquire(file = "fock_n.in", exist=exists)
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
+
+    inquire(file = trim(folder_)//"fock_n.in", exist=exists)
     if (exists .eqv. .true.) then
-        open(mytmp, file="fock_n.in")
+        open(mytmp, file=trim(folder_)//"fock_n.in")
         read(mytmp, *) ndim_n_nocore
         call alloc_fock_n()
         do num=1,ndim_n_nocore
@@ -333,19 +397,28 @@ subroutine read_fock_n()
 end subroutine read_fock_n
 
 !! read fock basis for final configuration
-subroutine read_fock_f()
+subroutine read_fock_f(folder)
     use m_constants, only: mystd, mytmp
     use m_control,   only: ndim_f
     use m_global,    only: fock_f, alloc_fock_f
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: num
+    character(len=30) :: folder_
 
-    inquire(file = "fock_f.in", exist=exists)
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
+
+    inquire(file = trim(folder_)//"fock_f.in", exist=exists)
     if (exists .eqv. .true.) then
-        open(mytmp, file="fock_f.in")
+        open(mytmp, file=trim(folder_)//"fock_f.in")
         read(mytmp, *) ndim_f
         call alloc_fock_f()
         do num=1,ndim_f
@@ -584,19 +657,21 @@ subroutine read_eigvecs(fname, nloc, eigvec, eigval)
 end subroutine read_eigvecs
 
 !! write eigenvalues
-subroutine write_lowest_eigvals(n, eigval)
+subroutine write_lowest_eigvals(fname, n, eigval)
     use m_constants, only: dp, mytmp
     use m_control, only: myid, master
 
     implicit none
 
+    character(*), intent(in) :: fname
     integer, intent(in) :: n
     real(dp), intent(in) :: eigval(n)
 
     integer :: i
 
     if (myid==master) then
-        open(mytmp, file="eigvals.dat")
+        !open(mytmp, file="eigvals.dat")
+        open(mytmp, file=fname)
         do i=1,n
             write(mytmp, "(i5, f20.10)") i, eigval(i)
         enddo 
@@ -607,12 +682,13 @@ subroutine write_lowest_eigvals(n, eigval)
 end subroutine write_lowest_eigvals
 
 !! write density matrix
-subroutine write_denmat(n, num_orbs, denmat)
+subroutine write_denmat(fname, n, num_orbs, denmat)
     use m_constants, only: dp, mytmp
     use m_control, only: myid, master
 
     implicit none
 
+    character(*), intent(in) :: fname
     integer, intent(in) :: n
     integer, intent(in) :: num_orbs
     complex(dp), intent(in) :: denmat(num_orbs, num_orbs, n)
@@ -620,7 +696,8 @@ subroutine write_denmat(n, num_orbs, denmat)
     integer :: i,j,k
 
     if (myid==master) then
-        open(mytmp, file="denmat.dat")
+        !open(mytmp, file="denmat.dat")
+        open(mytmp, file=fname)
         do i=1,n
             do j=1,num_orbs
                 do k=1,num_orbs

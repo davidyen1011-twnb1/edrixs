@@ -236,7 +236,7 @@ def write_umat(umat, fname, tol=1E-12, fmt_int='{:10d}', fmt_float='{:.15f}'):
 
 
 def write_config(
-        directory='.', ed_solver=1, num_val_orbs=2, num_core_orbs=2,
+        directory='./', ed_solver=1, num_val_orbs=2, num_core_orbs=2,
         neval=1, nvector=1, ncv=1, idump=True, num_gs=1, maxiter=500,
         linsys_max=1000, min_ndim=1000, nkryl=500, eigval_tol=1e-8,
         linsys_tol=1e-10, omega_in=0.0, gamma_in=0.1
@@ -270,7 +270,7 @@ def write_config(
         "&end"
     ]
 
-    f = open(directory + '/config.in', 'w')
+    f = open(directory + 'config.in', 'w')
     for item in config:
         f.write(item + "\n")
     f.close()

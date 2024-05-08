@@ -1,4 +1,4 @@
-subroutine ed_fsolver(comm, my_id, num_procs)
+subroutine ed_fsolver(comm, my_id, num_procs, folder)
     use m_control, only: master, origin_myid, origin_nprocs, origin_comm
     use m_control, only: myid, nprocs, new_comm, ndim_i
     use m_global, only: dealloc_fock_i
@@ -9,10 +9,18 @@ subroutine ed_fsolver(comm, my_id, num_procs)
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
+    character(*), intent(in), optional :: folder
 
     integer :: ierror
     integer :: color
     integer :: key
+    character(len=30) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
 !F2PY intent(in) comm
 !F2PY intent(in) my_id
@@ -21,9 +29,9 @@ subroutine ed_fsolver(comm, my_id, num_procs)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config()  
+    call config(folder_)  
     ! read fock to know the dimension of the Hamiltonian
-    call read_fock_i()
+    call read_fock_i(folder_)
     call dealloc_fock_i()
     if (ndim_i < origin_nprocs) then
         if (origin_myid==master) then
@@ -48,14 +56,18 @@ subroutine ed_fsolver(comm, my_id, num_procs)
     endif
 
     if (origin_myid < ndim_i) then
-        call ed_driver()
+        if (present(folder)) then
+            call ed_driver(folder)
+        else
+            call ed_driver()
+        endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)
     return
 end subroutine ed_fsolver
 
-subroutine xas_fsolver(comm, my_id, num_procs)
+subroutine xas_fsolver(comm, my_id, num_procs, folder)
     use m_control, only: master, origin_myid, origin_nprocs, origin_comm
     use m_control, only: myid, nprocs, new_comm, ndim_n, ndim_i, ndim_n_nocore, num_core_orbs
     use m_global, only: dealloc_fock_i, dealloc_fock_n
@@ -66,6 +78,7 @@ subroutine xas_fsolver(comm, my_id, num_procs)
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
+    character(*), intent(in), optional :: folder
 
     integer :: ierror
     integer :: color
