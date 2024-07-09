@@ -10,7 +10,7 @@ subroutine config(folder)
 
     logical :: exists
     integer :: ierror
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     namelist /control/ ed_solver, num_val_orbs, num_core_orbs, neval, nvector, &
                        idump, num_gs, maxiter, linsys_max, min_ndim, ncv, &
@@ -92,7 +92,7 @@ subroutine read_hopping_i(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -151,7 +151,7 @@ subroutine read_coulomb_i(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -210,7 +210,7 @@ subroutine read_fock_i(folder)
     
     logical :: exists
     integer :: num
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -252,7 +252,7 @@ subroutine read_hopping_n(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -311,7 +311,7 @@ subroutine read_coulomb_n(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -371,7 +371,7 @@ subroutine read_fock_n(folder)
 
     logical :: exists
     integer :: num
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -408,7 +408,7 @@ subroutine read_fock_f(folder)
 
     logical :: exists
     integer :: num
-    character(len=30) :: folder_
+    character(len=50) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -434,29 +434,38 @@ subroutine read_fock_f(folder)
 end subroutine read_fock_f
 
 !! read transition operators for XAS 
-subroutine read_transop_xas()
+subroutine read_transop_xas(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, ntran_xas
     use m_global,    only: transop_xas, alloc_transop_xas
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: i, j
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=50) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "transop_xas.in", exist=exists)
+    inquire(file = trim(folder_)//"transop_xas.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: transop_xas.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="transop_xas.in")
+        open(mytmp, file=trim(folder_)//"transop_xas.in")
         read(mytmp, *) ntran_xas
         call alloc_transop_xas()
         do num=1,ntran_xas
@@ -484,13 +493,15 @@ subroutine read_transop_xas()
 end subroutine read_transop_xas
 
 !! read transition operators for absorption process of RIXS
-subroutine read_transop_rixs_i()
+subroutine read_transop_rixs_i(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control, only: myid, master, new_comm, ntran_rixs_i
     use m_global, only: transop_rixs_i, alloc_transop_rixs_i
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     ! local variables
     logical :: exists
@@ -498,16 +509,23 @@ subroutine read_transop_rixs_i()
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=50) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "transop_rixs_i.in", exist=exists)
+    inquire(file = trim(folder_)//"transop_rixs_i.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: transop_rixs_i.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="transop_rixs_i.in")
+        open(mytmp, file=trim(folder_)//"transop_rixs_i.in")
         read(mytmp, *) ntran_rixs_i
         call alloc_transop_rixs_i()
         do num=1,ntran_rixs_i
@@ -535,29 +553,38 @@ subroutine read_transop_rixs_i()
 end subroutine read_transop_rixs_i
 
 !! read transition operators for emission process of RIXS
-subroutine read_transop_rixs_f()
+subroutine read_transop_rixs_f(folder)
     use m_constants, only: dp, mystd, mytmp
     use m_control,   only: myid, master, new_comm, ntran_rixs_f
     use m_global,    only: transop_rixs_f, alloc_transop_rixs_f
     use mpi
 
     implicit none
+    
+    character(*), intent(in), optional :: folder
 
     logical :: exists
     integer :: i, j
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
+    character(len=50) :: folder_
+
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
     exists = .false.
-    inquire(file = "transop_rixs_f.in", exist=exists)
+    inquire(file = trim(folder_)//"transop_rixs_f.in", exist=exists)
     if ( .not. exists ) then
         write(mystd, "(100a)") " fedrixs >>> ERROR: transop_rixs_f.in doesn't exist"
         STOP
     endif
 
     if (myid == master) then
-        open(mytmp, file="transop_rixs_f.in")
+        open(mytmp, file=trim(folder_)//"transop_rixs_f.in")
         read(mytmp, *) ntran_rixs_f
         call alloc_transop_rixs_f()
         do num=1,ntran_rixs_f

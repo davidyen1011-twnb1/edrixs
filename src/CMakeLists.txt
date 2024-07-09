@@ -13,6 +13,7 @@ set(src
   lanczos.f90
   arpack.f90
   ed_driver.f90
+  ed_driver_intermediate.f90
   xas_driver.f90
   rixs_driver.f90
   opavg_driver.f90)

@@ -3,7 +3,7 @@
 __all__ = ['combination', 'fock_bin', 'get_fock_bin_by_N', 'get_fock_half_N',
            'get_fock_full_N', 'get_fock_basis_by_NLz', 'get_fock_basis_by_NSz',
            'get_fock_basis_by_NJz', 'get_fock_basis_by_N_abelian',
-           'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N']
+           'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N', 'write_fock_dec_by_N_constrainedN1N2']
 
 import numpy as np
 import itertools
@@ -494,6 +494,106 @@ def write_fock_dec_by_N(N, r, fname='fock_i.in'):
     f = open(fname, 'w')
     print(ndim, file=f)
     for item in res:
+        print(item, file=f)
+    f.close()
+    return ndim
+
+def product_extend(res1_all, res2_all, N1, N2):
+    """
+    Combined the Fock states with "1" & "2"!
+    
+    Parameters:
+    ------------
+    res1_all
+    res2_all
+    N1
+    N2
+    """
+    nr = len(res1_all)
+    scale_ = int(2**N2)
+    res_all = []
+    
+    for ir in range(nr):
+        ndim1 = len(res1_all[ir])
+        ndim2 = len(res2_all[ir])
+        for i in range(ndim1):
+            for j in range(ndim2):
+                res = int(res1_all[ir][i]*scale_ + res2_all[ir][j])
+                res_all.append(res)
+
+    return res_all
+
+
+def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_i.in'):
+    """
+    Get decimal digitals to represent Fock states, sort them by
+    ascending order and then write them to file.
+
+    r1_range / r2_range should have the same number of elements.
+
+    But now we want to constrain the occupation of Fe / Oxygen to some certain number
+    of electrons...! "1" is moved to the left and larger than "2".
+
+    Parameters
+    ----------
+    N: int
+       Number of orbitals.
+    r: int
+        Number of occuancy.
+    fname: string
+        File name.
+
+    Returns
+    -------
+    ndim: int
+        The dimension of the Hilbert space
+
+    Examples
+    --------
+    >>> import edrixs
+    >>> edrixs.write_fock_dec_by_N(4, 2, 'fock_i.in')
+    file fock_i.in looks like
+    15
+    3
+    5
+    6
+    9
+    10
+    12
+    17
+    18
+    20
+    24
+    33
+    34
+    36
+    40
+    48
+
+    where, the first line is the total numer of Fock states,
+    and the following lines are the Fock states in decimal form.
+    """
+
+    # N1, r1
+    nr1 = int(r1_range.shape[0])
+    res1_all = []
+    for ir1, r1 in enumerate(r1_range):
+        res1_ = get_fock_full_N(N1, r1)
+        res1_all.append(res1_)
+
+    # N2, r2
+    nr2 = int(r2_range.shape[0])
+    res2_all = []
+    for ir2, r2 in enumerate(r2_range):
+        res2_ = get_fock_full_N(N2, r2)
+        res2_all.append(res2_)
+
+    res_combined = product_extend(res1_all, res2_all, N1, N2)
+    res_combined.sort()
+    ndim = len(res_combined)
+    f = open(fname, 'w')
+    print(ndim, file=f)
+    for item in res_combined:
         print(item, file=f)
     f.close()
     return ndim
