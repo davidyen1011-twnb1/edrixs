@@ -296,7 +296,7 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     return
 end subroutine rixs_fsolver
 
-subroutine opavg_fsolver(comm, my_id, num_procs)
+subroutine opavg_fsolver(comm, my_id, num_procs,folder)
     use m_control, only: master, origin_myid, origin_nprocs, origin_comm
     use m_control, only: myid, nprocs, new_comm, ndim_i
     use m_global, only: dealloc_fock_i
@@ -307,6 +307,8 @@ subroutine opavg_fsolver(comm, my_id, num_procs)
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
+
+    character(*), intent(in) :: folder
 
     integer :: ierror
     integer :: color
@@ -319,8 +321,8 @@ subroutine opavg_fsolver(comm, my_id, num_procs)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config()  
-    call read_fock_i()
+    call config(folder)  
+    call read_fock_i(folder)
     call dealloc_fock_i()
     if (ndim_i < origin_nprocs) then
         if (origin_myid==master) then
