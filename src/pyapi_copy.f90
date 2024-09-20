@@ -229,7 +229,7 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
-    character(*), intent(in) :: folder
+    character(*), intent(in), optional :: folder
 
     integer :: ierror
     integer :: color
@@ -238,11 +238,11 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     
     character(len=50) :: folder_
 
-    !if (present(folder)) then
-    !    folder_ = folder
-    !else
-    !    folder_ = "./"
-    !endif
+    if (present(folder)) then
+        folder_ = folder
+    else
+        folder_ = "./"
+    endif
 
 !F2PY intent(in) comm
 !F2PY intent(in) my_id
@@ -252,12 +252,12 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config(folder)  
-    call read_fock_i(folder)
+    call config(folder_)  
+    call read_fock_i(folder_)
     call dealloc_fock_i()
-    call read_fock_n(folder)
+    call read_fock_n(folder_)
     call dealloc_fock_n()
-    call read_fock_f(folder)
+    call read_fock_f(folder_)
     call dealloc_fock_f()
     ndim_n = ndim_n_nocore * num_core_orbs
     min_dim = min(ndim_i, ndim_n, ndim_f)
@@ -284,12 +284,11 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     endif
 
     if (origin_myid < min_dim) then
-        call rixs_driver(folder)
-        !if (present(folder)) then
-        !    call rixs_driver(folder)
-        !else
-        !    call rixs_driver()
-        !endif
+        if (present(folder)) then
+            call rixs_driver(folder)
+        else
+            call rixs_driver()
+        endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)

@@ -8,7 +8,7 @@ subroutine ed_driver(folder)
     
     implicit none
 
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: i,j,k
     integer :: icfg, jcfg
@@ -52,11 +52,11 @@ subroutine ed_driver(folder)
     !character(len=20) :: fname
     character(len=10) :: char_I
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
     time_begin = 0.0_dp
     time_end   = 0.0_dp
@@ -68,9 +68,9 @@ subroutine ed_driver(folder)
         print *, " fedrixs >>> ED begin ... "
         print *
     endif
-    call read_hopping_i(folder_)
-    call read_coulomb_i(folder_)
-    call read_fock_i(folder_)
+    call read_hopping_i(folder)
+    call read_coulomb_i(folder)
+    call read_fock_i(folder)
 
     if (ndim_i < min_ndim ) then
         if (myid==master) then
@@ -192,14 +192,14 @@ subroutine ed_driver(folder)
     time_begin=time_end
 
     !fname="eigvec."//trim(adjustl(char_I))
-    fname=trim(folder_)//"eigvals.dat"
+    fname=trim(folder)//"eigvals.dat"
     call write_lowest_eigvals(fname, neval, eigvals)
 
     if (myid==master) then
         print *, " fedrixs >>> Calculate the density matrix ... "
     endif
 
-    call read_fock_i(folder_)
+    call read_fock_i(folder)
     denmat = czero
     denmat_mpi = czero
     allocate(eigvecs_mpi(ndim_i))    
@@ -262,7 +262,7 @@ subroutine ed_driver(folder)
         ! dump eigenvectors 
         if ( idump ) then 
             write(char_I, '(i5)') k
-            fname=trim(folder_)//"eigvec."//trim(adjustl(char_I))
+            fname=trim(folder)//"eigvec."//trim(adjustl(char_I))
             if (myid==master) then
                 call write_eigvecs(fname, ndim_i, eigvecs_mpi, eigvals(k))
             endif
@@ -272,7 +272,7 @@ subroutine ed_driver(folder)
     call MPI_BARRIER(new_comm, ierror)
     call MPI_ALLREDUCE(denmat_mpi, denmat, size(denmat_mpi), MPI_DOUBLE_COMPLEX, MPI_SUM, new_comm, ierror)
     
-    fname=trim(folder_)//"denmat.dat"
+    fname=trim(folder)//"denmat.dat"
     call write_denmat(fname, nvector, num_val_orbs, denmat)
 
     call dealloc_fock_i()

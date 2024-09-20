@@ -8,7 +8,7 @@ subroutine xas_driver(folder)
     
     implicit none
 
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     ! local variables
     integer :: nblock
@@ -37,11 +37,11 @@ subroutine xas_driver(folder)
     !character(len=20) :: fname
     character(len=10) :: char_I
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
     if (myid == master) then
         print *, "---------------------------"
@@ -77,8 +77,8 @@ subroutine xas_driver(folder)
             print *, " fedrixs >>> For ground state: ", igs
             print *, "    Building transition operator for absorption process ..."
         endif
-        call read_fock_i(folder_)
-        call read_fock_n(folder_)
+        call read_fock_i(folder)
+        call read_fock_n(folder)
         nblock = nprocs
         call partition_task(nprocs, ndim_n, ndim_i, end_indx)
         mloc = end_indx(2,1,myid+1)-end_indx(1,1,myid+1) + 1
@@ -104,7 +104,7 @@ subroutine xas_driver(folder)
         eigvecs_mpi = czero
         eigvals = zero
         write(char_I, '(i5)') igs
-        fname=trim(folder_)//"eigvec."//trim(adjustl(char_I))
+        fname=trim(folder)//"eigvec."//trim(adjustl(char_I))
         call read_eigvecs(fname, ndim_i, eigvecs_mpi, eigvals)
         eigvecs = eigvecs_mpi(end_indx(1,2,myid+1): end_indx(2,2,myid+1)) 
         deallocate(eigvecs_mpi)
@@ -155,7 +155,7 @@ subroutine xas_driver(folder)
         call build_krylov_mp(nblock, end_indx2, needed2, mloc, ham_csr, phi_vec, nkryl, neff, krylov_alpha, krylov_beta, norm)
 
         write(char_I, '(I5)') igs
-        fname=trim(folder_)//"xas_poles."//trim(adjustl(char_I))
+        fname=trim(folder)//"xas_poles."//trim(adjustl(char_I))
         call write_krylov(fname, neff, krylov_alpha(1:neff), krylov_beta(1:neff), norm, eigvals)
 
         call dealloc_ham_csr(nblock)

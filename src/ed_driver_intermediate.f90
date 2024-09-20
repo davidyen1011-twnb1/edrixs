@@ -12,7 +12,7 @@ subroutine ed_driver_intermediate(folder)
     
     implicit none
 
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: i,j,k
     integer :: icfg, jcfg
@@ -56,11 +56,11 @@ subroutine ed_driver_intermediate(folder)
     !character(len=20) :: fname
     character(len=10) :: char_I
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
     time_begin = 0.0_dp
     time_end   = 0.0_dp
@@ -72,9 +72,9 @@ subroutine ed_driver_intermediate(folder)
         print *, " fedrixs >>> ED begin (intermediate) ... "
         print *
     endif
-    call read_hopping_n(folder_)
-    call read_coulomb_n(folder_)
-    call read_fock_n(folder_)
+    call read_hopping_n(folder)
+    call read_coulomb_n(folder)
+    call read_fock_n(folder)
     
     ! ................................................
     ! ndim_n = ndim_n_nocore * num_core_orbs 
@@ -207,7 +207,7 @@ subroutine ed_driver_intermediate(folder)
     time_begin=time_end
 
     !fname="eigvec."//trim(adjustl(char_I))
-    fname=trim(folder_)//"eigvals_n.dat"
+    fname=trim(folder)//"eigvals_n.dat"
     call write_lowest_eigvals(fname, neval, eigvals)
 
     if (myid==master) then
@@ -277,7 +277,7 @@ subroutine ed_driver_intermediate(folder)
         ! dump eigenvectors 
         if ( idump ) then 
             write(char_I, '(i5)') k
-            fname=trim(folder_)//"eigvec_n."//trim(adjustl(char_I))
+            fname=trim(folder)//"eigvec_n."//trim(adjustl(char_I))
             if (myid==master) then
                 call write_eigvecs(fname, ndim_n, eigvecs_mpi, eigvals(k))
             endif
