@@ -56,6 +56,7 @@ subroutine ed_fsolver(comm, my_id, num_procs, folder)
         call MPI_COMM_RANK(new_comm, myid, ierror)
         call MPI_COMM_SIZE(new_comm, nprocs, ierror)
     else
+        ! These are global variables...
         myid = origin_myid
         nprocs = origin_nprocs
         new_comm = origin_comm

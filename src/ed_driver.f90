@@ -199,10 +199,12 @@ subroutine ed_driver(folder)
         print *, " fedrixs >>> Calculate the density matrix ... "
     endif
 
+    ! Second block of the code : For computing density matrix
     call read_fock_i(folder)
     denmat = czero
     denmat_mpi = czero
-    allocate(eigvecs_mpi(ndim_i))    
+    allocate(eigvecs_mpi(ndim_i))
+    ! Collect k^{th} eigenvectors to eigvecs_mpi for computing density matrix  
     do k=1, nvector
         eigvecs_mpi = czero
         if (ed_solver==0) then
@@ -228,6 +230,7 @@ subroutine ed_driver(folder)
         endif
         call MPI_BARRIER(new_comm, ierror)
 
+        ! Calculate 1-particle density matrix from here
         do icfg=end_indx(1,1,myid+1), end_indx(2,1,myid+1)
             do j=1,num_val_orbs
                 if (btest(fock_i(icfg), j-1)) then
@@ -235,9 +238,11 @@ subroutine ed_driver(folder)
                 endif
             enddo
 
+            ! If c_{kf} is really small then skip the step
             if ( abs(eigvecs_mpi(icfg)) < 1E-10 ) cycle
             do i=1,num_val_orbs-1
                 do j=i+1,num_val_orbs
+                    ! If i^{th} spot of fock_i(icfg) is 0 then cycle
                     if (.not. btest(fock_i(icfg), i-1)) cycle
                     old = fock_i(icfg)
 
