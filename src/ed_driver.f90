@@ -237,6 +237,7 @@ subroutine ed_driver(folder)
                     denmat_mpi(j,j,k) = denmat_mpi(j,j,k) + conjg(eigvecs_mpi(icfg)) * eigvecs_mpi(icfg) 
                 endif
             enddo
+            print *, icfg, denmat_mpi(1,1,1)
 
             ! If c_{kf} is really small then skip the step
             if ( abs(eigvecs_mpi(icfg)) < 1E-10 ) cycle
