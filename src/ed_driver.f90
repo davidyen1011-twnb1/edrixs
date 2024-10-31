@@ -151,6 +151,12 @@ subroutine ed_driver(folder)
         if (myid==master) then
             call full_diag_ham(ndim_i, ham_full, eigval_full, eigvecs_full) 
         endif
+
+        ! Try to print this:
+        do i=1,ndim_i
+            print *, ham_full(i,1), ham_full(i,2), ham_full(i,3), ham_full(i,4), ham_full(i,5)
+        enddo
+
         call MPI_BARRIER(new_comm, ierror)
         call MPI_BCAST(eigval_full,   size(eigval_full),  MPI_DOUBLE_PRECISION, master, new_comm, ierror)
         call MPI_BCAST(eigvecs_full,  size(eigvecs_full), MPI_DOUBLE_COMPLEX, master, new_comm, ierror)
@@ -233,13 +239,14 @@ subroutine ed_driver(folder)
         ! Calculate 1-particle density matrix from here
         do icfg=end_indx(1,1,myid+1), end_indx(2,1,myid+1)
             do j=1,num_val_orbs
+                ! btest 'pos' counts from 0
                 if (btest(fock_i(icfg), j-1)) then
                     denmat_mpi(j,j,k) = denmat_mpi(j,j,k) + conjg(eigvecs_mpi(icfg)) * eigvecs_mpi(icfg) 
                 endif
             enddo
-            if (k==1) then
-                print *, icfg, denmat_mpi(1,1,1)
-            endif
+            !if (k==1) then
+            !    print *, icfg, denmat_mpi(1,1,1), eigvecs_mpi(icfg), btest(fock_i(icfg), 0)
+            !endif
 
             ! If c_{kf} is really small then skip the step
             if ( abs(eigvecs_mpi(icfg)) < 1E-10 ) cycle
