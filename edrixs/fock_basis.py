@@ -574,6 +574,9 @@ def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_
     and the following lines are the Fock states in decimal form.
     """
 
+    # Input output order : N1 -> N2
+    # fock order : N2 -> N1
+
     # N1, r1
     nr1 = int(r1_range.shape[0])
     res1_all = []
@@ -588,7 +591,7 @@ def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_
         res2_ = get_fock_full_N(N2, r2)
         res2_all.append(res2_)
 
-    res_combined = product_extend(res1_all, res2_all, N1, N2)
+    res_combined = product_extend(res2_all, res1_all, N2, N1)
     res_combined.sort()
     ndim = len(res_combined)
     f = open(fname, 'w')
