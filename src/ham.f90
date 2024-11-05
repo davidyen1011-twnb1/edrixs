@@ -772,10 +772,12 @@ subroutine build_transop_i(mcfgs, ncfgs, fock_left, fock_right, num_val_orbs, &
     num_of_cols = 0
     num_of_tot = 0
 
+    ! build fock basis for core
     do i=1,num_core_orbs
         fock_core(i) = (2_dp)**num_core_orbs - (1_dp) - (2_dp)**(num_core_orbs-i)
     enddo
 
+    ! build fock basis for core x valence
     do icfg=end_indx(1,1,myid+1), end_indx(2,1,myid+1)
         core_indx = (icfg-1)/mcfgs + 1
         val_indx = mod(icfg-1, mcfgs) + 1

@@ -3414,6 +3414,7 @@ def xas_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, *, gamma_c=0.
         print(" Use constrained basis for impurity & baths!")
         ntot_v_imp = v_norb
         ntot_v_baths = norb_bath * nbath
+        ntot_v = ntot_v_imp + ntot_v_baths
         constrained_basis = True
 
     if rank == 0:

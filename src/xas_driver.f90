@@ -49,11 +49,11 @@ subroutine xas_driver(folder)
         print *
     endif
 
-    call read_hopping_n(folder_)
-    call read_coulomb_n(folder_)
-    call read_transop_xas(folder_)
-    call read_fock_i(folder_)
-    call read_fock_n(folder_)
+    call read_hopping_n(folder)
+    call read_coulomb_n(folder)
+    call read_transop_xas(folder)
+    call read_fock_i(folder)
+    call read_fock_n(folder)
 
     ndim_n = ndim_n_nocore * num_core_orbs
 
