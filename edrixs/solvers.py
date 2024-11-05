@@ -3283,7 +3283,8 @@ def ed_siam_fort(comm, shell_name, nbath, *, siam_type=0, v_noccu=1, static_core
 def xas_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, *, gamma_c=0.1,
                   v_noccu=1, thin=1.0, phi=0, pol_type=None,
                   num_gs=1, nkryl=200, temperature=1.0,
-                  loc_axis=None, scatter_axis=None, folder="./"):
+                  loc_axis=None, scatter_axis=None, folder="./",\
+                   v_noccu_imp_arr=None, v_noccu_baths_arr=None, v_noccu_imp_arr_n=None, v_noccu_baths_arr_n=None):
     """
     Calculate XAS for single impurity Anderson model (SIAM) with Fortran solver.
 
@@ -3356,6 +3357,14 @@ def xas_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, *, gamma_c=0.
         - local :math:`z`-axis: scatter_axis[:,2]
 
         It will be set to an identity matrix if not provided.
+    v_noccu_imp_arr: int array, 
+        Number of total occupancy of impurity
+    v_noccu_baths_arr: int array, 
+        Number of total occupancy of baths
+    v_noccu_imp_arr_n: int array, 
+        Number of total occupancy of impurity (For intermediate states)
+    v_noccu_baths_arr_n: int array, 
+        Number of total occupancy of baths (For intermediate states)
 
     Returns
     -------
@@ -3399,12 +3408,26 @@ def xas_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, *, gamma_c=0.
     else:
         scatter_axis = np.array(scatter_axis)
 
+    # For constrained basis
+    constrained_basis = False
+    if (v_noccu_imp_arr is not None) and (v_noccu_baths_arr is not None) and (v_noccu_imp_arr_n is not None) and (v_noccu_baths_arr_n is not None):
+        print(" Use constrained basis for impurity & baths!")
+        ntot_v_imp = v_norb
+        ntot_v_baths = norb_bath * nbath
+        constrained_basis = True
+
     if rank == 0:
         print("edrixs >>> Running XAS ...", flush=True)
         write_config(directory=folder,num_val_orbs=ntot_v, num_core_orbs=c_norb,
                      num_gs=num_gs, nkryl=nkryl)
-        write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_i.in")
-        write_fock_dec_by_N(ntot_v, v_noccu + 1, folder+"fock_n.in")
+        if (constrained_basis):
+            write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr,\
+                        ntot_v_baths, v_noccu_baths_arr, folder+"fock_i.in")
+            write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr_n,\
+                        ntot_v_baths, v_noccu_baths_arr_n, folder+"fock_n.in")
+        else:
+            write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_i.in")
+            write_fock_dec_by_N(ntot_v, v_noccu + 1, folder+"fock_n.in")
 
     case = v_name + c_name
     tmp = get_trans_oper(case)
@@ -3705,7 +3728,8 @@ def xas_siam_fort(comm, shell_name, nbath, ominc, *, gamma_c=0.1,
 def rixs_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, eloss, *, gamma_c=0.1, gamma_f=0.1,
                    v_noccu=1, thin=1.0, thout=1.0, phi=0, pol_type=None, num_gs=1,
                    nkryl=200, linsys_max=1000, linsys_tol=1e-10, temperature=1.0,
-                   loc_axis=None, scatter_axis=None,folder="./"):
+                   loc_axis=None, scatter_axis=None,folder="./",\
+                   v_noccu_imp_arr=None, v_noccu_baths_arr=None, v_noccu_imp_arr_n=None, v_noccu_baths_arr_n=None):
     """
     Calculate RIXS for single impurity Anderson model with Fortran solver.
 
@@ -3785,6 +3809,14 @@ def rixs_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, eloss, *, ga
         - local :math:`z`-axis: scatter_axis[:,2]
 
         It will be set to an identity matrix if not provided.
+    v_noccu_imp_arr: int array, 
+        Number of total occupancy of impurity
+    v_noccu_baths_arr: int array, 
+        Number of total occupancy of baths
+    v_noccu_imp_arr_n: int array, 
+        Number of total occupancy of impurity (For intermediate states)
+    v_noccu_baths_arr_n: int array, 
+        Number of total occupancy of baths (For intermediate states)
 
     Returns
     -------
@@ -3829,11 +3861,27 @@ def rixs_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, eloss, *, ga
     else:
         scatter_axis = np.array(scatter_axis)
 
+    # For constrained basis
+    constrained_basis = False
+    if (v_noccu_imp_arr is not None) and (v_noccu_baths_arr is not None) and (v_noccu_imp_arr_n is not None) and (v_noccu_baths_arr_n is not None):
+        print(" Use constrained basis for impurity & baths!")
+        ntot_v_imp = v_norb
+        ntot_v_baths = norb_bath * nbath
+        constrained_basis = True
+
     if rank == 0:
         print("edrixs >>> Running RIXS ...", flush=True)
-        write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_i.in")
-        write_fock_dec_by_N(ntot_v, v_noccu + 1, folder+"fock_n.in")
-        write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_f.in")
+        if (constrained_basis):
+            write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr,\
+                        ntot_v_baths, v_noccu_baths_arr, folder+"fock_i.in")
+            write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr_n,\
+                        ntot_v_baths, v_noccu_baths_arr_n, folder+"fock_n.in")
+            write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr,\
+                        ntot_v_baths, v_noccu_baths_arr, folder+"fock_f.in")
+        else:
+            write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_i.in")
+            write_fock_dec_by_N(ntot_v, v_noccu + 1, folder+"fock_n.in")
+            write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_f.in")
 
         case = v_name + c_name
         tmp = get_trans_oper(case)
