@@ -2671,37 +2671,18 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
         sx, sy, sz = get_sx(v_orbl), get_sy(v_orbl), get_sz(v_orbl)
 
     if ext_B is not None:
-        # For multi-sites case
-        if ext_B.ndim >= 2:
-            norb_n = 0
-            for isite in range(ext_B.shape[1]):
-                if on_which.strip() == 'spin':
-                    zeeman = ext_B[isite,0] * (2 * sx) + ext_B[isite,1] * (2 * sy) + ext_B[isite,2] * (2 * sz)
-                elif on_which.strip() == 'orbital':
-                    # There should be a scale factor somewhere, init?
-                    zeeman = ext_B[isite,0] * lx + ext_B[isite,1] * ly + ext_B[isite,2] * lz
-                elif on_which.strip() == 'both':
-                    zeeman = ext_B[isite,0] * (lx + 2 * sx) + ext_B[isite,1] * (ly + 2 * sy) + ext_B[isite,2] * (lz + 2 * sz)
-                else:
-                    raise Exception("Unknown value of on_which", on_which)
-                
-                emat_i[norb_n:norb_n+v_norb[isite], norb_n:norb_n+v_norb[isite]] += zeeman
-                emat_n[norb_n:norb_n+v_norb[isite], norb_n:norb_n+v_norb[isite]] += zeeman
-                norb_n = norb_n + v_norb[isite]
-        
         # For single site case
+        if on_which.strip() == 'spin':
+            zeeman = ext_B[0] * (2 * sx) + ext_B[1] * (2 * sy) + ext_B[2] * (2 * sz)
+        elif on_which.strip() == 'orbital':
+            # There should be a scale factor somewhere, init?
+            zeeman = ext_B[0] * lx + ext_B[1] * ly + ext_B[2] * lz
+        elif on_which.strip() == 'both':
+            zeeman = ext_B[0] * (lx + 2 * sx) + ext_B[1] * (ly + 2 * sy) + ext_B[2] * (lz + 2 * sz)
         else:
-            if on_which.strip() == 'spin':
-                zeeman = ext_B[0] * (2 * sx) + ext_B[1] * (2 * sy) + ext_B[2] * (2 * sz)
-            elif on_which.strip() == 'orbital':
-                # There should be a scale factor somewhere, init?
-                zeeman = ext_B[0] * lx + ext_B[1] * ly + ext_B[2] * lz
-            elif on_which.strip() == 'both':
-                zeeman = ext_B[0] * (lx + 2 * sx) + ext_B[1] * (ly + 2 * sy) + ext_B[2] * (lz + 2 * sz)
-            else:
-                raise Exception("Unknown value of on_which", on_which)
-            emat_i[0:v_norb, 0:v_norb] += zeeman
-            emat_n[0:v_norb, 0:v_norb] += zeeman
+            raise Exception("Unknown value of on_which", on_which)
+        emat_i[0:v_norb, 0:v_norb] += zeeman
+        emat_n[0:v_norb, 0:v_norb] += zeeman
 
     # Perform ED if necessary
     if do_ed == 1 or do_ed == 2:
