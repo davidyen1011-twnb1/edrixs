@@ -3,7 +3,8 @@
 __all__ = ['combination', 'fock_bin', 'get_fock_bin_by_N', 'get_fock_half_N',
            'get_fock_full_N', 'get_fock_basis_by_NLz', 'get_fock_basis_by_NSz',
            'get_fock_basis_by_NJz', 'get_fock_basis_by_N_abelian',
-           'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N', 'write_fock_dec_by_N_constrainedN1N2']
+           'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N', 'write_fock_dec_by_N_constrainedN1N2',
+           'write_fock_dec_by_N_constrainedN1N2_multi']
 
 import numpy as np
 import itertools
@@ -592,6 +593,105 @@ def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_
         res2_all.append(res2_)
 
     res_combined = product_extend(res2_all, res1_all, N2, N1)
+    res_combined.sort()
+    ndim = len(res_combined)
+    f = open(fname, 'w')
+    print(ndim, file=f)
+    for item in res_combined:
+        print(item, file=f)
+    f.close()
+    return ndim
+
+def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths_range, fname='fock_i.in'):
+    """
+    Get decimal digitals to represent Fock states, sort them by
+    ascending order and then write them to file.
+
+    r1_range / r2_range should have the same number of elements.
+
+    But now we want to constrain the occupation of Fe / Oxygen to some certain number
+    of electrons...! "1" is moved to the left and larger than "2".
+
+    Parameters
+    ----------
+    N_imp[nsites]: int
+       Number of orbitals.
+    rimp_range [nsites, possilbe occupation numbers] : int
+        Number of occuancy.
+    N_baths: int
+       Number of orbitals.
+    rbaths_range [nsites] : int
+        Number of occuancy.
+    fname: string
+        File name.
+
+    Returns
+    -------
+    ndim: int
+        The dimension of the Hilbert space
+
+    Examples
+    --------
+    >>> import edrixs
+    >>> edrixs.write_fock_dec_by_N(4, 2, 'fock_i.in')
+    file fock_i.in looks like
+    15
+    3
+    5
+    6
+    9
+    10
+    12
+    17
+    18
+    20
+    24
+    33
+    34
+    36
+    40
+    48
+
+    where, the first line is the total numer of Fock states,
+    and the following lines are the Fock states in decimal form.
+    """
+
+    # Input output order : N1 -> N2
+    # fock order : N2 -> N1
+
+    # N1, r1 -> Impurity
+    nsites = int(N_imp.shape[0])
+    resimp_all_sites = []
+
+    for isite in range(nsites):
+        nr_imp = int(rimp_range.shape[isite,0])
+        resimp_all = []
+        for irimp, rimp in enumerate(rimp_range[isite,:]):
+            res_imp = get_fock_full_N(N_imp[isite], rimp)
+            resimp_all.append(res_imp)
+
+        resimp_all_sites.append(resimp_all)
+
+    # N2, r2
+    nr_baths = int(rbaths_range.shape[0])
+    resbaths_all = []
+    for irbaths, rbaths in enumerate(rbaths_range):
+        res_baths = get_fock_full_N(N_baths, rbaths)
+        resbaths_all.append(res_baths)
+
+    # Impurity
+    last = nsites - 1
+    res_now = resimp_all_sites[last]
+    N_now = N_imp[last]
+    for isite in range(nsites-1):
+        res_combined = product_extend(resimp_all_sites[last-1], res_now, N_imp[last-1], N_now)
+        last = last - 1
+        res_now = res_combined
+        N_now = N_now + N_imp[last-1] 
+
+    # Baths
+    res_combined = product_extend(resbaths_all, res_now, N_baths, N_now)
+
     res_combined.sort()
     ndim = len(res_combined)
     f = open(fname, 'w')
