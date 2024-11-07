@@ -128,27 +128,27 @@ fedrixs_OBJECTS = \
 # External object files for target fedrixs
 fedrixs_EXTERNAL_OBJECTS =
 
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/fedrixsmodule.c.o
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/opt/psi/Programming/intel/22.1/intelpython/python3.9/lib/python3.9/site-packages/numpy/f2py/src/fortranobject.c.o
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/pyapi.f90.o
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/build.make
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/build/temp.linux-x86_64-cpython-39/libedrixs.a
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /afs/psi.ch/sys/psi.merlin/Programming/intel/22.1/mpi/2021.5.0/lib/libmpifort.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /afs/psi.ch/sys/psi.merlin/Programming/intel/22.1/mpi/2021.5.0/lib/release/libmpi.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/libdl.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/librt.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/libpthread.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_intel_lp64.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_intel_thread.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_core.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/compiler/2022.0.1/linux/compiler/lib/intel64_lin/libiomp5.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /psi/home/yen_y/.local/lib/libparpack.so
-build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/psi/home/yen_y/Programs/EDRIXS/edrixs/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C shared library ../build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so"
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/fedrixsmodule.c.o
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/opt/psi/Programming/intel/22.1/intelpython/python3.9/lib/python3.9/site-packages/numpy/f2py/src/fortranobject.c.o
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/pyapi.f90.o
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/build.make
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/build/temp.linux-x86_64-cpython-39/libedrixs.a
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /afs/psi.ch/sys/psi.merlin/Programming/intel/22.1/mpi/2021.5.0/lib/libmpifort.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /afs/psi.ch/sys/psi.merlin/Programming/intel/22.1/mpi/2021.5.0/lib/release/libmpi.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/libdl.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/librt.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /lib64/libpthread.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_intel_lp64.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_intel_thread.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/mkl/2022.0.1/lib/intel64/libmkl_core.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /opt/psi/Programming/intel/22.1/compiler/2022.0.1/linux/compiler/lib/intel64_lin/libiomp5.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: /psi/home/yen_y/.local/lib/libparpack.so
+src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so: src/CMakeFiles/fedrixs.dir/link.txt
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/psi/home/yen_y/Programs/EDRIXS/edrixs/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking C shared library build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so"
 	cd /psi/home/yen_y/Programs/EDRIXS/edrixs/src && $(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/fedrixs.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
-src/CMakeFiles/fedrixs.dir/build: build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so
+src/CMakeFiles/fedrixs.dir/build: src/build/lib.linux-x86_64-cpython-39/edrixs/fedrixs.cpython-39-x86_64-linux-gnu.so
 
 .PHONY : src/CMakeFiles/fedrixs.dir/build
 
