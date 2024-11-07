@@ -659,14 +659,17 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     # Input output order : N1 -> N2
     # fock order : N2 -> N1
 
+    print("Building constrained basis...!")
     # N1, r1 -> Impurity
     nsites = int(N_imp.shape[0])
     resimp_all_sites = []
 
     for isite in range(nsites):
-        nr_imp = int(rimp_range.shape[isite,0])
+        print("Site ", isite)
+        nr_imp = int(rimp_range.shape[1])
         resimp_all = []
         for irimp, rimp in enumerate(rimp_range[isite,:]):
+            print("rimp", rimp)
             res_imp = get_fock_full_N(N_imp[isite], rimp)
             resimp_all.append(res_imp)
 
@@ -676,6 +679,7 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     nr_baths = int(rbaths_range.shape[0])
     resbaths_all = []
     for irbaths, rbaths in enumerate(rbaths_range):
+        print("baths :", irbaths)
         res_baths = get_fock_full_N(N_baths, rbaths)
         resbaths_all.append(res_baths)
 
@@ -684,13 +688,17 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     res_now = resimp_all_sites[last]
     N_now = N_imp[last]
     for isite in range(nsites-1):
+        print("combining site ", isite)
         res_combined = product_extend(resimp_all_sites[last-1], res_now, N_imp[last-1], N_now)
         last = last - 1
         res_now = res_combined
         N_now = N_now + N_imp[last-1] 
 
     # Baths
+    print("combining baths!")
     res_combined = product_extend(resbaths_all, res_now, N_baths, N_now)
+
+    print(len(res_combined))
 
     res_combined.sort()
     ndim = len(res_combined)

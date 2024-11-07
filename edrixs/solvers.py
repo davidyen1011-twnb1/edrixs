@@ -17,7 +17,9 @@ from .photon_transition import (
 )
 from .coulomb_utensor import get_umat_slater, get_umat_slater_3shells
 from .manybody_operator import two_fermion, four_fermion
-from .fock_basis import get_fock_bin_by_N, write_fock_dec_by_N, write_fock_dec_by_N_constrainedN1N2
+from .fock_basis import get_fock_bin_by_N, write_fock_dec_by_N,\
+        write_fock_dec_by_N_constrainedN1N2,\
+        write_fock_dec_by_N_constrainedN1N2_multi
 from .basis_transform import cb_op2, tmat_r2c, cb_op
 from .utils import info_atomic_shell, slater_integrals_name, boltz_dist
 from .rixs_utils import scattering_mat
@@ -3155,8 +3157,13 @@ def ed_siam_fort_multisites(comm, shell_name, nbath, norb_bath, v_norb_multi, c_
         raise Exception("Unknown siam_type: ", siam_type)
 
     if c_name in ['p', 'd', 'f']:
-        emat_n[ntot_v:ntot, ntot_v:ntot] += atom_hsoc(c_name, c_soc)
-
+        cur = ntot_v
+        for isite in range(nsites-1):
+            emat_n[cur:cur+c_norb_multi[isite],\
+                    cur:cur+c_norb_multi[isite]] += atom_hsoc(c_name, c_soc)
+            cur = cur+c_norb_multi[isite]
+        emat_n[cur:, cur:] += atom_hsoc(c_name, c_soc)
+    
     # static core potential
     emat_n[0:v_norb, 0:v_norb] -= np.eye(v_norb) * static_core_pot
 
@@ -3186,9 +3193,9 @@ def ed_siam_fort_multisites(comm, shell_name, nbath, norb_bath, v_norb_multi, c_
 
     if ext_B is not None:
         # For multi-sites case
-        if ext_B.ndim >= 2:
+        if ext_B.shape[0] >= 2:
             norb_n = 0
-            for isite in range(ext_B.shape[1]):
+            for isite in range(nsites):
                 if on_which.strip() == 'spin':
                     zeeman = ext_B[isite,0] * (2 * sx) + ext_B[isite,1] * (2 * sy) + ext_B[isite,2] * (2 * sz)
                 elif on_which.strip() == 'orbital':
@@ -3221,7 +3228,8 @@ def ed_siam_fort_multisites(comm, shell_name, nbath, norb_bath, v_norb_multi, c_
     if do_ed == 1 or do_ed == 2:
         eval_shift = c_level * c_norb / v_noccu
         emat_i[0:ntot_v, 0:ntot_v] += np.eye(ntot_v) * eval_shift
-        emat_n[ntot_v:ntot, ntot_v:ntot] += np.eye(c_norb) * c_level
+        emat_n[ntot_v:, ntot_v:] += np.eye(c_norb*nsites) * c_level
+        
         if rank == 0:
             write_emat(emat_i, folder+'hopping_i.in')
             write_emat(emat_n, folder+'hopping_n.in')
