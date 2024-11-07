@@ -680,6 +680,7 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     resbaths_all = []
     for irbaths, rbaths in enumerate(rbaths_range):
         print("baths :", irbaths)
+        print("N, r", N_baths, rbaths)
         res_baths = get_fock_full_N(N_baths, rbaths)
         resbaths_all.append(res_baths)
 
