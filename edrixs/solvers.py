@@ -3060,7 +3060,7 @@ def ed_siam_fort_multisites(comm, shell_name, nbath, norb_bath, v_norb_multi, c_
     indx_sites = np.array(indx_sites)
 
     # [imp1, imp2,..,c_imp1, c_imp2, .....]
-    indx_all = list(range(0, np.sum(v_norb_multi)) + [ntot_v + i for i in range(0, np.sum(c_norb_multi))])
+    indx_all = list(range(0, np.sum(v_norb_multi))) + [ntot_v + i for i in range(0, np.sum(c_norb_multi))]
 
     # Initial states
     if (umat_input_i is not None):
