@@ -1947,7 +1947,10 @@ def ed_siam_fort_intermediate_fixed(comm, shell_name, nbath, norb_bath, *, siam_
     noccu_gs: int
         Occupancy of the ground state.
     """
-    from .fedrixs import ed_fsolver, ed_fsolver_intermediate
+    try:
+        from fedrixs import ed_fsolver, ed_fsolver_intermediate
+    except:
+        from fedrixs import ed_fsolver, ed_fsolver_intermediate
 
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -2462,7 +2465,10 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
     noccu_gs: int
         Occupancy of the ground state.
     """
-    from .fedrixs import ed_fsolver
+    try:
+        from .fedrixs import ed_fsolver
+    except:
+        from fedrixs import ed_fsolver
 
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -3900,7 +3906,10 @@ def xas_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, *, gamma_c=0.
     poles: list of dict, shape=(len(pol_type), )
         The calculated XAS poles for different polarizations.
     """
-    from .fedrixs import xas_fsolver
+    try:
+        from .fedrixs import xas_fsolver
+    except:
+        from fedrixs import xas_fsolver
 
     rank = comm.Get_rank()
     size = comm.Get_size()
@@ -4355,7 +4364,10 @@ def rixs_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, eloss, *, ga
         The calculated RIXS poles. The 1st dimension is for incident energy, and the
         2nd dimension is for different polarizations.
     """
-    from .fedrixs import rixs_fsolver
+    try:
+        from .fedrixs import rixs_fsolver
+    except:
+        from fedrixs import rixs_fsolver
 
     rank = comm.Get_rank()
     size = comm.Get_size()

@@ -4,6 +4,7 @@ import sys
 
 from setuptools import Extension, find_packages, setup
 from setuptools.command.build_ext import build_ext
+import setuptools
 
 # needed for setuptools.build_meta to pickup vendored versioneer.py
 sys.path.insert(0, os.path.dirname(__file__))
@@ -51,6 +52,9 @@ class CMakeExtension(Extension):
         self.cmake_lists_dir = os.path.abspath(cmake_lists_dir)
 
 
+home_lib_path = "$HOME/.local/lib/"
+python_lib_path = "/afs/psi.ch/sys/psi.merlin/Programming/intel/22.1/intelpython/python3.9/"
+python_lib = "/opt/psi/Programming/psi-python39/2021.11/lib/python/"
 class cmake_build_ext(build_ext):
     def build_extensions(self):
         # Ensure that CMake is present and working
@@ -71,6 +75,7 @@ class cmake_build_ext(build_ext):
                 "-DCMAKE_ARCHIVE_OUTPUT_DIRECTORY={}".format(self.build_temp),
                 # Don't need executables for python lib
                 "-DCMAKE_RUNTIME_OUTPUT_DIRECTORY={}".format(self.build_temp),
+                "-DCMAKE_LIBRARY_PATH={}".format(python_lib)
             ]
 
             configure_args = os.getenv("CMAKE_CONFIGURE_ARGS")

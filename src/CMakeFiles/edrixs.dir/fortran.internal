@@ -1,0 +1,7 @@
+# The fortran modules provided by this target.
+provides
+ m_constants.mod
+ m_control.mod
+ m_global.mod
+ m_lanczos.mod
+ m_types.mod

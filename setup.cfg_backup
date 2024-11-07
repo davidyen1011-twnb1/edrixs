@@ -6,10 +6,10 @@ versionfile_build = edrixs/_version.py
 tag_prefix = v
 
 [config_fc]
-f77exec=mpiifort
-f90exec=mpiifort
+f77exec=mpif90
+f90exec=mpif90
 
 [build_ext]
 libraries=openblas,parpack,arpack
-library_dirs=/usr/lib:/opt/local/lib/:${MKLROOT}/lib/intel64/:$HOME/arpack/arpack-ng-3.6.3/local/:/psi/home/yen_y/arpack/arpack-ng-3.6.3/local/lib/:$HOME/.local/:$HOME/.local/lib/
+library_dirs=/usr/lib:/opt/local/lib
 link_objects=./src/libedrixsfortran.a
