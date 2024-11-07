@@ -2992,7 +2992,10 @@ def ed_siam_fort_multisites(comm, shell_name, nbath, norb_bath, v_norb_multi, c_
     noccu_gs: int
         Occupancy of the ground state.
     """
-    from .fedrixs import ed_fsolver
+    try:
+        from .fedrixs import ed_fsolver
+    except:
+        from fedrixs import ed_fsolver
 
     rank = comm.Get_rank()
     size = comm.Get_size()
