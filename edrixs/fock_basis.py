@@ -502,13 +502,17 @@ def write_fock_dec_by_N(N, r, fname='fock_i.in'):
 def product_extend(res1_all, res2_all, N1, N2):
     """
     Combined the Fock states with "1" & "2"!
+    order : 1 --> 2
     
     Parameters:
     ------------
-    res1_all
-    res2_all
+    res1_all [#_vnoccu, #1_combinations]
+    res2_all [#_vnoccu, #2_combinations]
     N1
     N2
+    
+    # output :
+    res_all [#_vnocci x #1 x #2]
     """
     nr = len(res1_all)
     scale_ = int(2**N2)
@@ -523,6 +527,83 @@ def product_extend(res1_all, res2_all, N1, N2):
                 res_all.append(res)
 
     return res_all
+
+def product_extend2(res1_all, res2_all, N1, N2):
+    """
+    Combined the Fock states with "1" & "2"!
+    order : 1 --> 2
+    
+    Parameters:
+    ------------
+    res1_all [#_vnoccu, #1_combinations]
+    res2_all [#_vnoccu, #2_combinations]
+    N1
+    N2
+    
+    # output :
+    res_all [#_vnocci, #1 x #2]
+    """
+    nr = len(res1_all)
+    scale_ = int(2**N2)
+    res_all = []
+    
+    for ir in range(nr):
+        ndim1 = len(res1_all[ir])
+        ndim2 = len(res2_all[ir])
+        res_r = []
+        for i in range(ndim1):
+            for j in range(ndim2):
+                res = int(res1_all[ir][i]*scale_ + res2_all[ir][j])
+                res_r.append(res)
+        res_all.append(res_r)
+
+    return res_all
+
+def product_extend_multisites(res_imp_all, Nimp):
+    """
+    Combined the Fock states with "1" -> "2"!
+    
+    Parameters:
+    ------------
+    res_imp_all     : [Nsites, #_noccu, #_combinations*]
+    Nimp            : [Nsites]
+
+    Output:
+    res_all         : [#_occu, #_combinations*]
+    """
+    nsites = len(res_imp_all)
+    nr = len(res_imp_all[0])
+    
+    N_sum = np.sum(np.array(Nimp))
+    N_sum_arr = np.array([ np.sum(np.array(Nimp[i:])) for i in range(nsites) ])
+    scale_arr = 2**N_sum / np.power(2, N_sum_arr)   # [nsites]
+    
+    res_all = []
+    
+    cur = nsites-1
+    res_now = res_imp_all[cur]
+    N_now = Nimp[cur]
+    for isite in range(nsites-1):
+        res_comb = product_extend2(res_imp_all[cur-1], res_now,\
+                Nimp[cur-1], N_now)
+        
+        cur = cur - 1
+        N_now = N_now + Nimp[cur]
+        res_now = res_comb
+    
+    print(len(res_now), len(res_now[1]))
+
+    #for ir in range(nr):
+    #    for isite in range(nsites):     # Sum over sites
+    #        if isite == 0:
+    #            comb = np.array(res_imp_all[isite][ir])*scale_arr[isite]  # [#_comb*]
+    #        else:
+    #            comb = comb +\
+    #                    np.array(res_imp_all[isite][ir])*scale_arr[isite]  # [#_comb*]
+    #            
+    #    res_all.append(comb)
+
+    return res_now, N_sum
 
 
 def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_i.in'):
@@ -591,7 +672,8 @@ def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_
     for ir2, r2 in enumerate(r2_range):
         res2_ = get_fock_full_N(N2, r2)
         res2_all.append(res2_)
-
+    
+    # Fock basis writing order : [2 -> 1]
     res_combined = product_extend(res2_all, res1_all, N2, N1)
     res_combined.sort()
     ndim = len(res_combined)
@@ -620,7 +702,7 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
         Number of occuancy.
     N_baths: int
        Number of orbitals.
-    rbaths_range [nsites] : int
+    rbaths_range [possible occupation number] : int
         Number of occuancy.
     fname: string
         File name.
@@ -670,10 +752,13 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
         resimp_all = []
         for irimp, rimp in enumerate(rimp_range[isite,:]):
             print("rimp", rimp)
-            res_imp = get_fock_full_N(N_imp[isite], rimp)
+            res_imp = get_fock_full_N(N_imp[isite], rimp)       # Array of 
             resimp_all.append(res_imp)
 
         resimp_all_sites.append(resimp_all)
+    
+    #print(resimp_all)
+    # resimp_all_sites [nsite, noccu, n_combination*]
 
     # N2, r2
     nr_baths = int(rbaths_range.shape[0])
@@ -684,20 +769,30 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
         res_baths = get_fock_full_N(N_baths, rbaths)
         resbaths_all.append(res_baths)
 
-    # Impurity
-    last = nsites - 1
-    res_now = resimp_all_sites[last]
-    N_now = N_imp[last]
-    for isite in range(nsites-1):
-        print("combining site ", isite)
-        res_combined = product_extend(resimp_all_sites[last-1], res_now, N_imp[last-1], N_now)
-        last = last - 1
-        res_now = res_combined
-        N_now = N_now + N_imp[last-1] 
+    # resbaths_all[noccu, n_combination*]
+
+    # Impurity - Combining several impurities
+    #last = nsites - 1
+    #res_now = resimp_all_sites[last]        # still 2D
+    #N_now = N_imp[last]
+    
+    resimp_all_comb, N_imps = product_extend_multisites(resimp_all_sites, N_imp)
+    print(N_imps)
+    print(len(resimp_all_comb), len(resimp_all_comb[1]))
+    print(len(resbaths_all), len(resbaths_all[1]))
+
+    #for isite in range(nsites-1):
+    #    print("combining site ", isite)
+    #    res_combined = product_extend(resimp_all_sites[last-1], res_now, N_imp[last-1], N_now)
+    #    last = last - 1
+    #    res_now = res_combined
+    #    N_now = N_now + N_imp[last-1]
+    #
+    #print(len(res_now))
 
     # Baths
     print("combining baths!")
-    res_combined = product_extend(resbaths_all, res_now, N_baths, N_now)
+    res_combined = product_extend(resbaths_all, resimp_all_comb, N_baths, N_imps)
 
     print(len(res_combined))
 
