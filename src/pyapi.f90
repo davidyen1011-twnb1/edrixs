@@ -6,27 +6,22 @@ subroutine ed_fsolver(comm, my_id, num_procs, folder)
 
     implicit none
 
-    interface 
-        subroutine ed_driver(folder)
-            character(*) :: folder
-        end subroutine
-    end interface 
-
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
-    character(*), intent(in), optional :: folder
+    !character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: ierror
     integer :: color
     integer :: key
     character(len=50) :: folder_
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
 !F2PY intent(in) comm
 !F2PY intent(in) my_id
@@ -35,9 +30,9 @@ subroutine ed_fsolver(comm, my_id, num_procs, folder)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config(folder_)  
+    call config(folder)  
     ! read fock to know the dimension of the Hamiltonian
-    call read_fock_i(folder_)
+    call read_fock_i(folder)
     call dealloc_fock_i()
     if (ndim_i < origin_nprocs) then
         if (origin_myid==master) then
@@ -56,14 +51,18 @@ subroutine ed_fsolver(comm, my_id, num_procs, folder)
         call MPI_COMM_RANK(new_comm, myid, ierror)
         call MPI_COMM_SIZE(new_comm, nprocs, ierror)
     else
-        ! These are global variables...
         myid = origin_myid
         nprocs = origin_nprocs
         new_comm = origin_comm
     endif
 
     if (origin_myid < ndim_i) then
-        call ed_driver(folder_)
+        call ed_driver(folder)
+        !if (present(folder)) then
+        !    call ed_driver(folder)
+        !else
+        !    call ed_driver()
+        !endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)
@@ -78,16 +77,10 @@ subroutine ed_fsolver_intermediate(comm, my_id, num_procs, folder)
 
     implicit none
 
-    interface 
-        subroutine ed_driver_intermediate(folder)
-            character(*) :: folder
-        end subroutine
-    end interface 
-
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: ndim_n
     integer :: ierror
@@ -95,11 +88,11 @@ subroutine ed_fsolver_intermediate(comm, my_id, num_procs, folder)
     integer :: key
     character(len=50) :: folder_
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
     ndim_n = ndim_n_nocore * num_core_orbs
 
@@ -110,9 +103,9 @@ subroutine ed_fsolver_intermediate(comm, my_id, num_procs, folder)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config(folder_)  
+    call config(folder)  
     ! read fock to know the dimension of the Hamiltonian
-    call read_fock_n(folder_)
+    call read_fock_n(folder)
     call dealloc_fock_n()
     if (ndim_n < origin_nprocs) then
         if (origin_myid==master) then
@@ -137,7 +130,12 @@ subroutine ed_fsolver_intermediate(comm, my_id, num_procs, folder)
     endif
 
     if (origin_myid < ndim_n) then
-        call ed_driver_intermediate(folder_)
+        call ed_driver_intermediate(folder)
+        !if (present(folder)) then
+        !    call ed_driver_intermediate(folder)
+        !else
+        !    call ed_driver_intermediate()
+        !endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)
@@ -152,16 +150,10 @@ subroutine xas_fsolver(comm, my_id, num_procs, folder)
 
     implicit none
 
-    interface 
-        subroutine xas_driver(folder)
-            character(*) :: folder
-        end subroutine
-    end interface 
-
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: ierror
     integer :: color
@@ -170,11 +162,11 @@ subroutine xas_fsolver(comm, my_id, num_procs, folder)
     
     character(len=50) :: folder_
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
 !F2PY intent(in) comm
 !F2PY intent(in) my_id
@@ -213,7 +205,12 @@ subroutine xas_fsolver(comm, my_id, num_procs, folder)
     endif
 
     if (origin_myid < min_dim) then
-        call xas_driver(folder_)
+        call xas_driver(folder)
+        !if (present(folder)) then
+        !    call xas_driver(folder)
+        !else
+        !    call xas_driver()
+        !endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)
@@ -229,16 +226,10 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
 
     implicit none
 
-    interface 
-        subroutine rixs_driver(folder)
-            character(*) :: folder
-        end subroutine
-    end interface 
-
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
-    character(*), intent(in), optional :: folder
+    character(*), intent(in) :: folder
 
     integer :: ierror
     integer :: color
@@ -247,11 +238,11 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     
     character(len=50) :: folder_
 
-    if (present(folder)) then
-        folder_ = folder
-    else
-        folder_ = "./"
-    endif
+    !if (present(folder)) then
+    !    folder_ = folder
+    !else
+    !    folder_ = "./"
+    !endif
 
 !F2PY intent(in) comm
 !F2PY intent(in) my_id
@@ -293,14 +284,19 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     endif
 
     if (origin_myid < min_dim) then
-        call rixs_driver(folder_)
+        call rixs_driver(folder)
+        !if (present(folder)) then
+        !    call rixs_driver(folder)
+        !else
+        !    call rixs_driver()
+        !endif
     endif
 
     call MPI_BARRIER(origin_comm, ierror)
     return
 end subroutine rixs_fsolver
 
-subroutine opavg_fsolver(comm, my_id, num_procs)
+subroutine opavg_fsolver(comm, my_id, num_procs,folder)
     use m_control, only: master, origin_myid, origin_nprocs, origin_comm
     use m_control, only: myid, nprocs, new_comm, ndim_i
     use m_global, only: dealloc_fock_i
@@ -311,6 +307,8 @@ subroutine opavg_fsolver(comm, my_id, num_procs)
     integer, intent(in) :: comm
     integer, intent(in) :: my_id
     integer, intent(in) :: num_procs
+
+    character(*), intent(in) :: folder
 
     integer :: ierror
     integer :: color
@@ -323,8 +321,8 @@ subroutine opavg_fsolver(comm, my_id, num_procs)
     origin_myid = my_id
     origin_nprocs = num_procs
 
-    call config()  
-    call read_fock_i()
+    call config(folder)  
+    call read_fock_i(folder)
     call dealloc_fock_i()
     if (ndim_i < origin_nprocs) then
         if (origin_myid==master) then
