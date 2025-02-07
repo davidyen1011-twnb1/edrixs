@@ -4,7 +4,7 @@ __all__ = ['combination', 'fock_bin', 'get_fock_bin_by_N', 'get_fock_half_N',
            'get_fock_full_N', 'get_fock_basis_by_NLz', 'get_fock_basis_by_NSz',
            'get_fock_basis_by_NJz', 'get_fock_basis_by_N_abelian',
            'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N', 'write_fock_dec_by_N_constrainedN1N2',
-           'write_fock_dec_by_N_constrainedN1N2_multi']
+           'write_fock_dec_by_N_constrainedN1N2_multi', 'write_fock_dec_by_N_constrainedN1N2N3']
 
 import numpy as np
 import itertools
@@ -591,7 +591,7 @@ def product_extend_multisites(res_imp_all, Nimp):
         N_now = N_now + Nimp[cur]
         res_now = res_comb
     
-    print(len(res_now), len(res_now[1]))
+    #print(len(res_now), len(res_now[1]))
 
     #for ir in range(nr):
     #    for isite in range(nsites):     # Sum over sites
@@ -605,6 +605,96 @@ def product_extend_multisites(res_imp_all, Nimp):
 
     return res_now, N_sum
 
+def write_fock_dec_by_N_constrainedN1N2N3(N1, r1_range, N2, r2_range, N3, r3_range, fname='fock_i.in'):
+    """
+    Get decimal digitals to represent Fock states, sort them by
+    ascending order and then write them to file.
+
+    r1_range / r2_range / r3_range should have the same number of elements.
+
+    But now we want to constrain the occupation of Fe / Oxygen to some certain number
+    of electrons...! "1" is moved to the left and larger than "2".
+
+    Parameters
+    ----------
+    N: int
+       Number of orbitals.
+    r: int
+        Number of occuancy.
+    fname: string
+        File name.
+
+    Returns
+    -------
+    ndim: int
+        The dimension of the Hilbert space
+
+    Examples
+    --------
+    >>> import edrixs
+    >>> edrixs.write_fock_dec_by_N(4, 2, 'fock_i.in')
+    file fock_i.in looks like
+    15
+    3
+    5
+    6
+    9
+    10
+    12
+    17
+    18
+    20
+    24
+    33
+    34
+    36
+    40
+    48
+
+    where, the first line is the total numer of Fock states,
+    and the following lines are the Fock states in decimal form.
+    """
+
+    # Input output order : N1 -> N2
+    # fock order : N2 -> N1
+
+    # Bugs still exist in for the 3rd case here...!
+
+    # N1, r1
+    nr1 = int(r1_range.shape[0])
+    res1_all = []
+    for ir1, r1 in enumerate(r1_range):
+        res1_ = get_fock_full_N(N1, r1)
+        res1_all.append(res1_)
+
+    # N2, r2
+    nr2 = int(r2_range.shape[0])
+    res2_all = []
+    for ir2, r2 in enumerate(r2_range):
+        res2_ = get_fock_full_N(N2, r2)
+        res2_all.append(res2_)
+
+    # N3, r3
+    nr3 = int(r3_range.shape[0])
+    res3_all = []
+    for ir3, r3 in enumerate(r3_range):
+        res3_ = get_fock_full_N(N3, r3)
+        res3_all.append(res3_)
+    
+    # Fock basis writing order : [3 -> 2 -> 1]
+    res_combined_32 = product_extend(res3_all, res2_all, N3, N2)
+    res_combined_32.sort()
+
+    res_combined = product_extend(res_combined_32, res1_all, N3+N2, N1)
+    res_combined.sort()
+
+    ndim = len(res_combined)
+    f = open(fname, 'w')
+    print(ndim, file=f)
+    for item in res_combined:
+        print(item, file=f)
+    f.close()
+    return ndim
 
 def write_fock_dec_by_N_constrainedN1N2(N1, r1_range, N2, r2_range, fname='fock_i.in'):
     """
@@ -777,9 +867,9 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     #N_now = N_imp[last]
     
     resimp_all_comb, N_imps = product_extend_multisites(resimp_all_sites, N_imp)
-    print(N_imps)
-    print(len(resimp_all_comb), len(resimp_all_comb[1]))
-    print(len(resbaths_all), len(resbaths_all[1]))
+    #print(N_imps)
+    #print(len(resimp_all_comb), len(resimp_all_comb[1]))
+    #print(len(resbaths_all), len(resbaths_all[1]))
 
     #for isite in range(nsites-1):
     #    print("combining site ", isite)
