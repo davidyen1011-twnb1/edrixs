@@ -536,6 +536,8 @@ def product_extend_general(res_all, N_all):
         res_next = res_all[icase+1]
         N_next = N_all[icase+1]
 
+        print(icase, len(res_now), len(res_next))
+
         scale_ = int(2**N_next)
         res_cur = []  #[nr]
         for ir in range(nr):
@@ -546,10 +548,10 @@ def product_extend_general(res_all, N_all):
                 for j in range(ndim_next):
                     res = int(res_now[ir][i]*scale_ + res_next[ir][j])
                     res_int.append(res)
-                res_int.apend(res_int)
+            res_cur.append(res_int)
 
-    res_all = res_cur.flatten()    
-
+    #res_all = res_cur.flatten()    
+    res_all = [x for xs in res_cur for x in xs]
     return res_all
 
 def product_extend(res1_all, res2_all, N1, N2):
@@ -1044,6 +1046,8 @@ def write_fock_dec_by_N_general(N_imp, rimp_range, N_bath, rbath_range, fname='f
 
     # Combining all impurities + all baths
     print("combining baths!")
+    print(len(res_all), len(res_all[0]), len(res_all[1]), len(res_all[2]))
+    print(N_all)
     res_combined = product_extend_general(res_all, N_all)
 
     res_combined.sort()

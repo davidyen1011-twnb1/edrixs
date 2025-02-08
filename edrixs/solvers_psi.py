@@ -219,8 +219,8 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
         last_v = 0
         last_c = 0
         for imp in range(n_imp):
-            emat_i[last_v:last_v+v_norb[imp], last_v:last_v+v_norb[imp]] += np.eye(v_norb) * eval_shift
-            emat_n[ntot_v+last_c:ntot_v+last_c+c_norb[imp], ntot_v+last_c:ntot_v+last_c+c_norb[imp]] += np.eye(c_norb) * c_level
+            emat_i[last_v:last_v+v_norb[imp], last_v:last_v+v_norb[imp]] += np.eye(v_norb[imp]) * eval_shift
+            emat_n[ntot_v+last_c:ntot_v+last_c+c_norb[imp], ntot_v+last_c:ntot_v+last_c+c_norb[imp]] += np.eye(c_norb[imp]) * c_level
             last_v += v_norb[imp]
             last_c += c_norb[imp]
 
