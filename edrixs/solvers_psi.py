@@ -26,7 +26,7 @@ from .soc import atom_hsoc
 
 
 def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
-                 c_soc=0, ext_B=None,on_which='spin', do_ed=1, ed_solver=2, neval=1,
+                 c_soc=0, ext_B=None, hopping=None, hopping_n=None, on_which='spin', do_ed=1, ed_solver=2, neval=1,
                  nvector=1, ncv=3, idump=False, maxiter=1000, eigval_tol=1e-8, min_ndim=1000,
                  umat_input_i=None, umat_input_n=None, folder="./", v_norb=None, c_norb=None,\
                  b_norb=None, v_orbl=None, v_noccu_imp=None, v_noccu_baths=None):
@@ -55,6 +55,13 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
         They will be set to zero if not provided.
     on_which: string
         Apply Zeeman exchange field on which sector. Options are 'spin', 'orbital' or 'both'.
+    hopping: 2d complex array
+        General hopping matrix when siam_type=1, including imp_mat and hybridization functions,
+        for siam_type=1 and the initial configurations.
+    hopping_n: 2d complex array
+        General hopping matrix when siam_type=1, including imp_mat and hybridization functions,
+        for siam_type=1 and the intermediate configurations. If hopping_n=None,
+        hopping will be used.
     do_ed: int
         - 1: Only do ED for given occupancy number *v_noccu*, return eigenvalues and
           density matrix, write eigenvectors to files eigvec.n
