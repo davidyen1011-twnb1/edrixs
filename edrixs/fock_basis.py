@@ -4,7 +4,8 @@ __all__ = ['combination', 'fock_bin', 'get_fock_bin_by_N', 'get_fock_half_N',
            'get_fock_full_N', 'get_fock_basis_by_NLz', 'get_fock_basis_by_NSz',
            'get_fock_basis_by_NJz', 'get_fock_basis_by_N_abelian',
            'get_fock_basis_by_N_LzSz', 'write_fock_dec_by_N', 'write_fock_dec_by_N_constrainedN1N2',
-           'write_fock_dec_by_N_constrainedN1N2_multi', 'write_fock_dec_by_N_constrainedN1N2N3']
+           'write_fock_dec_by_N_constrainedN1N2_multi', 'write_fock_dec_by_N_constrainedN1N2N3',
+           'write_fock_dec_by_N_general']
 
 import numpy as np
 import itertools
@@ -499,6 +500,58 @@ def write_fock_dec_by_N(N, r, fname='fock_i.in'):
     f.close()
     return ndim
 
+def product_extend_general(res_all, N_all):
+    """
+    Combined the Fock states with "1" & "2"!
+    order : 1 --> 2 --> 3 --> 4 ....
+    
+    Parameters:
+    ------------
+    res_all [res1_all, res2_all, res3_all...]
+    N_all [N1, N2, N3]
+    
+    res1_all [#_vnoccu, #1_combinations]
+    res2_all [#_vnoccu, #2_combinations]
+    ...
+    N1
+    N2
+    N3
+    ...
+    
+    # output :
+    res_all [#_vnocci x #1 x #2]
+    """
+    n_case = len(res_all)
+    nr = len(res_all[0])
+    
+    # Summing over all cases to prevent memory-demanding high-dimensional array
+    for icase in range(n_case-1):
+        if icase == 0:
+            res_now = res_all[icase]
+            N_now = N_all[icase]
+        else:
+            res_now = res_cur
+            N_now = np.sum(N_all[:icase+1])
+
+        res_next = res_all[icase+1]
+        N_next = N_all[icase+1]
+
+        scale_ = int(2**N_next)
+        res_cur = []  #[nr]
+        for ir in range(nr):
+            res_int = []
+            ndim_now = len(res_now[ir])
+            ndim_next = len(res_next[ir])
+            for i in range(ndim_now):
+                for j in range(ndim_next):
+                    res = int(res_now[ir][i]*scale_ + res_next[ir][j])
+                    res_int.append(res)
+                res_int.apend(res_int)
+
+    res_all = res_cur.flatten()    
+
+    return res_all
+
 def product_extend(res1_all, res2_all, N1, N2):
     """
     Combined the Fock states with "1" & "2"!
@@ -885,6 +938,113 @@ def write_fock_dec_by_N_constrainedN1N2_multi(N_imp, rimp_range, N_baths, rbaths
     res_combined = product_extend(resbaths_all, resimp_all_comb, N_baths, N_imps)
 
     print(len(res_combined))
+
+    res_combined.sort()
+    ndim = len(res_combined)
+    f = open(fname, 'w')
+    print(ndim, file=f)
+    for item in res_combined:
+        print(item, file=f)
+    f.close()
+    return ndim
+
+def write_fock_dec_by_N_general(N_imp, rimp_range, N_bath, rbath_range, fname='fock_i.in'):
+    """
+    Get decimal digitals to represent Fock states, sort them by
+    ascending order and then write them to file.
+
+    r1_range / r2_range should have the same number of elements.
+
+    General case for multi-impurities and multi-baths.
+
+    Parameters
+    ----------
+    N_imp [nimp]: int
+       Number of orbitals.
+    rimp_range [nimp, possilbe occupation numbers] : int
+        Number of occuancy.
+    N_bath [nbaths]: int
+       Number of orbitals.
+    rbath_range [nbaths, possible occupation number] : int
+        Number of occuancy.
+    fname: string
+        File name.
+
+    Returns
+    -------
+    ndim: int
+        The dimension of the Hilbert space
+
+    Examples
+    --------
+    >>> import edrixs
+    >>> edrixs.write_fock_dec_by_N(4, 2, 'fock_i.in')
+    file fock_i.in looks like
+    15
+    3
+    5
+    6
+    9
+    10
+    12
+    17
+    18
+    20
+    24
+    33
+    34
+    36
+    40
+    48
+
+    where, the first line is the total numer of Fock states,
+    and the following lines are the Fock states in decimal form.
+    """
+
+    # Input output order : N1 -> N2
+    # fock order : N2 -> N1
+
+    res_all = []
+    N_all = []
+
+    print("Building constrained basis...!")
+    # N1, r1 -> Impurity
+    nsites = int(N_imp.shape[0])
+    resimp_all_sites = []
+
+    for isite in range(nsites):
+        print("Site ", isite)
+        nr_imp = int(rimp_range.shape[1])
+        resimp_all = []
+        for irimp, rimp in enumerate(rimp_range[isite,:]):
+            print("rimp", rimp)
+            res_imp = get_fock_full_N(N_imp[isite], rimp)       # Array of 
+            resimp_all.append(res_imp)
+
+        resimp_all_sites.append(resimp_all)
+        N_all.append(N_imp[isite])
+        res_all.append(resimp_all)
+
+    # N2, r2 -> baths
+    nbaths = int(N_bath.shape[0]) 
+    resbaths_all_sites = []
+
+    for ibath in range(nbaths):
+        print("Baths ", ibath)
+        nr_bath = int(rbath_range.shape[1])
+        resbaths_all = []
+        for irbath, rbath in enumerate(rbath_range[ibath,:]):
+            print("rbath", rbath)
+            res_bath = get_fock_full_N(N_bath[ibath], rbath)
+            resbaths_all.append(res_bath)
+
+        resbaths_all_sites.append(resbaths_all)
+        N_all.append(N_bath[ibath])
+        res_all.append(resbaths_all)
+
+    # Combining all impurities + all baths
+    print("combining baths!")
+    res_combined = product_extend_general(res_all, N_all)
 
     res_combined.sort()
     ndim = len(res_combined)
