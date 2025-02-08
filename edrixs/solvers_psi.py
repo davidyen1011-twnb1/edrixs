@@ -25,7 +25,7 @@ from .plot_spectrum import get_spectra_from_poles, merge_pole_dicts
 from .soc import atom_hsoc
 
 
-def ed_siam_fort_general(comm, *, c_name, static_core_pot=0, c_level=0,
+def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
                  c_soc=0, ext_B=None,on_which='spin', do_ed=1, ed_solver=2, neval=1,
                  nvector=1, ncv=3, idump=False, maxiter=1000, eigval_tol=1e-8, min_ndim=1000,
                  umat_input_i=None, umat_input_n=None, folder="./", v_norb=None, c_norb=None,\
