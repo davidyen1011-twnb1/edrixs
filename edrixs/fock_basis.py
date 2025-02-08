@@ -1048,6 +1048,9 @@ def write_fock_dec_by_N_general(N_imp, rimp_range, N_bath, rbath_range, fname='f
     print("combining baths!")
     print(len(res_all), len(res_all[0]), len(res_all[1]), len(res_all[2]))
     print(N_all)
+    # Reverse order
+    res_all = res_all[::-1]
+    N_all = N_all[::-1]
     res_combined = product_extend_general(res_all, N_all)
 
     res_combined.sort()
