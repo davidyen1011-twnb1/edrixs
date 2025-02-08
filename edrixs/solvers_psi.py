@@ -181,7 +181,10 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
             last_c += c_norb[imp]
 
     # Static core potential
-    emat_n[0:ntot_v, 0:ntot_v] -= np.eye(v_norb) * static_core_pot
+    last_v = 0
+    for imp in range(n_imp):
+        emat_n[last_v:last_v+v_norb[imp], last_v:last_v+v_norb[imp]] -= np.eye(v_norb[imp]) * static_core_pot
+        last_v += v_norb[imp]
 
     # Zeeman terms
     last_v = 0
