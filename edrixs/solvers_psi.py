@@ -94,9 +94,6 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
         ed_solver=1 will be used.
     umat_input_i : rank 4 tensor, interaction tensor Umat for initial states
     umat_input_n : rank 4 tensor, interaction tensor Umat for intermediate states
-    v_norb_multi: int array, 
-        Number of total orbitals of impurity+baths(except for the last one), only implemented for do_ed=1
-    multibaths : Truee / False. Whether activate multibaths calculations.
     v_orbl [n_imp] : l quantum number for each impurity sites
     v_norb [n_imp] : impurity valence orbitals
     c_norb [n_imp] : impurity core orbitals
@@ -130,8 +127,6 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
     ntot = ntot_v + np.sum(c_norb)                  # v_imp + c_imp + v_bath
     ntot_imp = np.sum(v_norb) + np.sum(c_norb)      # v_imp + c_imp
     n_imp = len(v_norb)                             # number of impurity sites
-
-    constrained_basis = False
 
     umat_i = np.zeros((ntot, ntot, ntot, ntot), dtype=complex)
     umat_n = np.zeros((ntot, ntot, ntot, ntot), dtype=complex)
@@ -257,4 +252,242 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
     else:
         return None, None, None
         raise Exception("Unknown case of do_ed ", do_ed)
+
+def xas_siam_fort_general(comm, ominc, *, gamma_c=0.1, thin=1.0, phi=0, pol_type=None,
+                num_gs=1, nkryl=200, temperature=1.0,
+                loc_axis=None, scatter_axis=None, folder="./",\
+                v_norb=None, c_norb=None, b_norb=None, v_orbl=None,\
+                v_noccu_imp=None, v_noccu_baths=None, v_noccu_imp_n=None, v_noccu_baths_n=None):
+    """
+    Calculate XAS for single impurity Anderson model (SIAM) with Fortran solver.
+
+    Parameters
+    ----------
+    comm: MPI_comm
+        MPI communicator.
+    shell_name: tuple of two strings
+        Names of valence and core shells. The 1st (2nd) string in the tuple is for the
+        valence (core) shell.
+
+        - The 1st string can only be 's', 'p', 't2g', 'd', 'f',
+
+        - The 2nd string can be 's', 'p', 'p12', 'p32', 'd', 'd32', 'd52',
+          'f', 'f52', 'f72'.
+
+        For example: shell_name=('d', 'p32') may indicate a :math:`L_3` edge transition from
+        core :math:`2p_{3/2}` shell to valence :math:`3d` shell for Ni.
+    nbath: int
+        Number of bath sites.
+    ominc: 1d float array
+        Incident energy of photon.
+    gamma_c: a float number or a 1d float array with the same shape as ominc.
+        The core-hole life-time broadening factor. It can be a constant value
+        or incident energy dependent.
+    v_noccu: int
+        Total occupancy of valence shells.
+    thin: float number
+        The incident angle of photon (in radian).
+    phi: float number
+        Azimuthal angle (in radian), defined with respect to the
+        :math:`x`-axis of the local scattering axis: scatter_axis[:,0].
+    pol_type: list of tuples
+        Type of polarization, options can be:
+
+        - ('linear', alpha), linear polarization, where alpha is the angle between the
+          polarization vector and the scattering plane in radians.
+
+        - ('left', 0), left circular polarization.
+
+        - ('right', 0), right circular polarization.
+
+        - ('isotropic', 0). isotropic polarization.
+
+        It will set pol_type=[('isotropic', 0)] if not provided.
+    num_gs: int
+        Number of initial states used in XAS calculations.
+    nkryl: int
+        Maximum number of poles obtained.
+    temperature: float number
+        Temperature (in K) for boltzmann distribution.
+    loc_axis: 3*3 float array
+        The local axis with respect to which local orbitals are defined.
+
+        - x: local_axis[:,0],
+
+        - y: local_axis[:,1],
+
+        - z: local_axis[:,2].
+
+        It will be an identity matrix if not provided.
+    scatter_axis: 3*3 float array
+        The local axis defining the scattering geometry. The scattering plane is defined in
+        the local :math:`zx`-plane.
+
+        - local :math:`x`-axis: scatter_axis[:,0]
+
+        - local :math:`y`-axis: scatter_axis[:,1]
+
+        - local :math:`z`-axis: scatter_axis[:,2]
+
+        It will be set to an identity matrix if not provided.
+    v_orbl [n_imp] : l quantum number for each impurity sites
+    v_norb [n_imp] : impurity valence orbitals
+    c_norb [n_imp] : impurity core orbitals
+    b_norb [n_baths] : bath orbitals
+    v_noccu_imp: int array, 
+        Number of total occupancy of impurity
+    v_noccu_baths: int array, 
+        Number of total occupancy of baths
+    v_noccu_imp_n: int array, 
+        Number of total occupancy of impurity (For intermediate states)
+    v_noccu_baths_n: int array, 
+        Number of total occupancy of baths (For intermediate states)
+
+    Returns
+    -------
+    xas: 2d array, shape=(len(ominc), len(pol_type))
+        The calculated XAS spectra. The first dimension is for ominc, and the second dimension
+        if for different polarizations.
+    poles: list of dict, shape=(len(pol_type), )
+        The calculated XAS poles for different polarizations.
+    """
+    try:
+        from .fedrixs import xas_fsolver
+    except:
+        from fedrixs import xas_fsolver
+
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+    fcomm = comm.py2f()
+
+    # v_name
+    # c_name
+
+    ntot_v = np.sum(v_norb) + np.sum(b_norb)    
+    ntot_c = np.sum(c_norb)
+    ntot_b = np.sum(b_norb)
+    ntot = ntot_v + np.sum(c_norb)                  # v_imp + c_imp + v_bath
+    ntot_imp = np.sum(v_norb) + np.sum(c_norb)      # v_imp + c_imp
+    n_imp = len(v_norb)                             # number of impurity sites
+
+    # Polarization
+    if pol_type is None:
+        pol_type = [('isotropic', 0)]
+    if loc_axis is None:
+        loc_axis = np.eye(3)
+    else:
+        loc_axis = np.array(loc_axis)
+    if scatter_axis is None:
+        scatter_axis = np.eye(3)
+    else:
+        scatter_axis = np.array(scatter_axis)
+
+    # For constrained basis
+    constrained_basis = False
+    if (v_noccu_imp_arr is not None) and (v_noccu_baths_arr is not None) and (v_noccu_imp_arr_n is not None) and (v_noccu_baths_arr_n is not None):
+        print(" Use constrained basis for impurity & baths!")
+        ntot_v_imp = v_norb
+        ntot_v_baths = norb_bath * nbath
+        ntot_v = ntot_v_imp + ntot_v_baths
+        constrained_basis = True
+
+    if rank == 0:
+        print("edrixs >>> Running XAS ...", flush=True)
+        write_config(directory=folder,num_val_orbs=ntot_v, num_core_orbs=c_norb,
+                     num_gs=num_gs, nkryl=nkryl)
+
+        # Using Constrained basis
+        print("..................................... ")
+        print("Using constrained basis. ")
+        print("..................................... ")
+        write_fock_dec_by_N_general(v_norb, v_noccu_imp,\
+                    b_norb, v_noccu_baths, folder+"fock_i.in")
+        write_fock_dec_by_N_general(v_norb, v_noccu_imp_n,\
+                    b_norb, v_noccu_baths_n, folder+"fock_i.in")
+
+    case = v_name + c_name
+    tmp = get_trans_oper(case)
+    npol, n, m = tmp.shape
+    tmp_g = np.zeros((npol, n, m), dtype=complex)
+    trans_mat = np.zeros((npol, ntot, ntot), dtype=complex)
+    # Transform the transition operators to global-xyz axis
+    # dipolar transition
+    if npol == 3:
+        for i in range(3):
+            for j in range(3):
+                tmp_g[i] += loc_axis[i, j] * tmp[j]
+    # quadrupolar transition
+    elif npol == 5:
+        alpha, beta, gamma = rmat_to_euler(loc_axis)
+        wignerD = get_wigner_dmat(4, alpha, beta, gamma)
+        rotmat = np.dot(np.dot(tmat_r2c('d'), wignerD), np.conj(np.transpose(tmat_r2c('d'))))
+        for i in range(5):
+            for j in range(5):
+                tmp_g[i] += rotmat[i, j] * tmp[j]
+    else:
+        raise Exception("Have NOT implemented this case: ", npol)
+    trans_mat[:, 0:v_norb, ntot_v:ntot] = tmp_g
+
+    n_om = len(ominc)
+    gamma_core = np.zeros(n_om, dtype=float)
+    if np.isscalar(gamma_c):
+        gamma_core[:] = np.ones(n_om) * gamma_c
+    else:
+        gamma_core[:] = gamma_c
+
+    # loop over different polarization
+    xas = np.zeros((n_om, len(pol_type)), dtype=float)
+    poles = []
+    comm.Barrier()
+    for it, (pt, alpha) in enumerate(pol_type):
+        if pt.strip() == 'left' or pt.strip() == 'right' or pt.strip() == 'linear':
+            if rank == 0:
+                print("edrixs >>> Loop over for polarization: ", it, pt, flush=True)
+                kvec = unit_wavevector(thin, phi, scatter_axis, 'in')
+                polvec = np.zeros(npol, dtype=complex)
+                pol = dipole_polvec_xas(thin, phi, alpha, scatter_axis, pt)
+                if npol == 3:  # Dipolar transition
+                    polvec[:] = pol
+                if npol == 5:  # Quadrupolar transition
+                    polvec[:] = quadrupole_polvec(pol, kvec)
+
+                trans = np.zeros((ntot, ntot), dtype=complex)
+                for i in range(npol):
+                    trans[:, :] += trans_mat[i] * polvec[i]
+                write_emat(trans, folder+'transop_xas.in')
+
+            # call XAS solver in fedrixs
+            comm.Barrier()
+            xas_fsolver(fcomm, rank, size, folder)
+            comm.Barrier()
+
+            # Read the spectrum from 'xas_poles.' files...
+            file_list = [folder+'xas_poles.' + str(i+1) for i in range(num_gs)]
+            pole_dict = read_poles_from_file(file_list)
+            poles.append(pole_dict)
+            xas[:, it] = get_spectra_from_poles(pole_dict, ominc, gamma_core, temperature)
+        elif pt.strip() == 'isotropic':
+            pole_dicts = []
+            for k in range(npol):
+                if rank == 0:
+                    print("edrixs >>> Loop over for polarization: ", it, pt, flush=True)
+                    print("edrixs >>> Isotropic, component: ", k, flush=True)
+                    write_emat(trans_mat[k], folder+'transop_xas.in')
+
+                # call XAS solver in fedrixs
+                comm.Barrier()
+                xas_fsolver(fcomm, rank, size, folder)
+                comm.Barrier()
+
+                # Read the spectrum from 'xas_poles.' files...
+                file_list = [folder+'xas_poles.' + str(i+1) for i in range(num_gs)]
+                pole_tmp = read_poles_from_file(file_list)
+                xas[:, it] += get_spectra_from_poles(pole_tmp, ominc, gamma_core, temperature)
+                pole_dicts.append(pole_tmp)
+            xas[:, it] = xas[:, it] / npol
+            poles.append(merge_pole_dicts(pole_dicts))
+        else:
+            raise Exception("Unknown polarization type: ", pt)
+
+    return xas, poles
 
