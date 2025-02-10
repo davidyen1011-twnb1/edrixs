@@ -19,7 +19,8 @@ from .coulomb_utensor import get_umat_slater, get_umat_slater_3shells
 from .manybody_operator import two_fermion, four_fermion
 from .fock_basis import get_fock_bin_by_N, write_fock_dec_by_N,\
         write_fock_dec_by_N_constrainedN1N2,\
-        write_fock_dec_by_N_constrainedN1N2_multi
+        write_fock_dec_by_N_constrainedN1N2_multi,\
+        write_fock_dec_by_N_constrainedN1N2N3
 from .basis_transform import cb_op2, tmat_r2c, cb_op
 from .utils import info_atomic_shell, slater_integrals_name, boltz_dist
 from .rixs_utils import scattering_mat
@@ -2321,7 +2322,8 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
                  bath_level_n=None, hyb=None, hyb_n=None, hopping=None, hopping_n=None,
                  slater=None, ext_B=None,on_which='spin', do_ed=0, ed_solver=2, neval=1,
                  nvector=1, ncv=3, idump=False, maxiter=1000, eigval_tol=1e-8, min_ndim=1000,
-                 umat_input_i=None, umat_input_n=None, folder="./", v_noccu_imp_arr=None, v_noccu_baths_arr=None):
+                 umat_input_i=None, umat_input_n=None, folder="./", v_noccu_imp_arr=None, v_noccu_baths_arr=None,\
+                 multibaths=False, v_norb_multi=None):
     """
     Find the ground state of the initial Hamiltonian of a Single Impuirty Anderson Model (SIAM),
     and also prepare input files, *hopping_i.in*, *hopping_n.in*, *coulomb_i.in*, *coulomb_n.in*
@@ -2453,10 +2455,10 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
         ed_solver=1 will be used.
     umat_input_i : rank 4 tensor, interaction tensor Umat for initial states
     umat_input_n : rank 4 tensor, interaction tensor Umat for intermediate states
-    v_noccu_imp_arr: int array, 
-        Number of total occupancy of impurity, only implemented for do_ed=1
-    v_noccu_baths_arr: int array, 
-        Number of total occupancy of baths, only implemented for do_ed=1
+    v_norb_multi: int array, 
+        Number of total orbitals of impurity+baths(except for the last one), only implemented for do_ed=1
+    multibaths : Truee / False. Whether activate multibaths calculations.
+    
 
     Returns
     -------
@@ -2499,11 +2501,22 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
     ntot = ntot_v + c_norb                  # v_imp + c_imp + v_bath
 
     constrained_basis = False
-    if (v_noccu_imp_arr is not None) and (v_noccu_baths_arr is not None):
+    if (v_noccu_imp_arr is not None) and (v_noccu_baths_arr is not None) and not (multibaths):
         print(" Use constrained basis for impurity & baths! (Just implemented for do_ed=1) ")
+        print("v_norb : ", v_norb)
         ntot_v_imp = v_norb
         ntot_v_baths = norb_bath * nbath
         constrained_basis = True
+
+    if (multibaths) :
+        print(" Use constrained basis for N baths impurity & baths! (Just implemented for do_ed=1) ")
+        ntot_v = np.sum(v_norb_multi) + norb_bath * nbath       # v_imp + v_bath 
+        ntot = ntot_v + c_norb 
+
+        ntot_imp = v_norb + c_norb 
+        ntot_v_imp = v_norb_multi                           # [nsites]
+        ntot_v_baths = norb_bath * nbath                    # The last bath
+        constrained_basis = False
 
     slater_name = slater_integrals_name((v_name, c_name), ('v', 'c'))
     # For 2 shells -> [FX_11,FX_12,GX_12,FX_22]
@@ -2706,6 +2719,12 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
             )
             if (constrained_basis):
                 write_fock_dec_by_N_constrainedN1N2(ntot_v_imp, v_noccu_imp_arr,\
+                        ntot_v_baths, v_noccu_baths_arr, folder+"fock_i.in")
+            elif (multibaths):
+                # Currently count the occupied bath as one of the impurity
+                #   Change this in the future...
+                print("USING MULTIBATHS CONSTRAINED BASIS!")
+                write_fock_dec_by_N_constrainedN1N2_multi(ntot_v_imp, v_noccu_imp_arr,\
                         ntot_v_baths, v_noccu_baths_arr, folder+"fock_i.in")
             else:
                 write_fock_dec_by_N(ntot_v, v_noccu, folder+"fock_i.in")

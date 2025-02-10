@@ -12,4 +12,5 @@ from .soc import *
 from .utils import *
 from .wannier_ham import *
 from .solvers import *
+from .solvers_psi import *
 from .slater_condon import *
