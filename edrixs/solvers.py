@@ -2361,7 +2361,7 @@ def ed_siam_fort_fixed(comm, shell_name, nbath, norb_bath, *, siam_type=0, v_noc
         Number of total occupancy of impurity and baths orbitals, required when do_ed=1, 2
     static_core_pot: float
         Static core hole potential.
-    c_level: float
+    c_level: float array
         Energy level of core shell.
     c_soc: float
         Spin-orbit coupling strength of core electrons.

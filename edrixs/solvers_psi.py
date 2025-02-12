@@ -208,16 +208,12 @@ def ed_siam_fort_general(comm, c_name, *, static_core_pot=0, c_level=0,
     # Perform ED 
     if do_ed == 1:
 
-        v_noccu = v_noccu_imp[:,0] + np.sum(v_noccu_baths[:,0])     # [n_imp]
+        v_noccu = np.sum(v_noccu_imp[:,0]) + np.sum(v_noccu_baths[:,0])    
         # Shift the core level
-        eval_shift = c_level * c_norb / v_noccu                     # [n_imp]
-        last_v = 0
-        last_c = 0
-        for imp in range(n_imp):
-            emat_i[last_v:last_v+v_norb[imp], last_v:last_v+v_norb[imp]] += np.eye(v_norb[imp]) * eval_shift[imp]
-            emat_n[ntot_v+last_c:ntot_v+last_c+c_norb[imp], ntot_v+last_c:ntot_v+last_c+c_norb[imp]] += np.eye(c_norb[imp]) * c_level[imp]
-            last_v += v_norb[imp]
-            last_c += c_norb[imp]
+        eval_shift = c_level * np.sum(c_norb) / v_noccu                    
+
+        emat_i[:ntot_v, :ntot_v]  += np.eye(ntot_v) * eval_shift
+        emat_n[ntot_v:ntot, ntot_v:ntot] += np.eye(np.sum(c_norb)) * c_level
 
         if rank == 0:
             # Write hopping files
