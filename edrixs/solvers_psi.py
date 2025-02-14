@@ -659,7 +659,7 @@ def rixs_siam_fort_general(comm, ominc, eloss, v_name, c_name,*, gamma_c=0.1, ga
     for iom, omega in enumerate(ominc):
         if rank == 0:
             write_config(
-                directory=folder, num_val_orbs=ntot_v, num_core_orbs=c_norb,
+                directory=folder, num_val_orbs=ntot_v, num_core_orbs=ntot_c,
                 omega_in=omega, gamma_in=gamma_core[iom],
                 num_gs=num_gs, nkryl=nkryl, linsys_max=linsys_max,
                 linsys_tol=linsys_tol
