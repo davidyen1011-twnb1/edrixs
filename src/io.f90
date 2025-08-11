@@ -10,7 +10,7 @@ subroutine config(folder)
 
     logical :: exists
     integer :: ierror
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     namelist /control/ ed_solver, num_val_orbs, num_core_orbs, neval, nvector, &
                        idump, num_gs, maxiter, linsys_max, min_ndim, ncv, &
@@ -92,7 +92,7 @@ subroutine read_hopping_i(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -151,7 +151,7 @@ subroutine read_coulomb_i(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -210,7 +210,7 @@ subroutine read_fock_i(folder)
     
     logical :: exists
     integer :: num
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -252,7 +252,7 @@ subroutine read_hopping_n(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -311,7 +311,7 @@ subroutine read_coulomb_n(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -371,7 +371,7 @@ subroutine read_fock_n(folder)
 
     logical :: exists
     integer :: num
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -408,7 +408,7 @@ subroutine read_fock_f(folder)
 
     logical :: exists
     integer :: num
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -449,7 +449,7 @@ subroutine read_transop_xas(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -509,7 +509,7 @@ subroutine read_transop_rixs_i(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder
@@ -568,7 +568,7 @@ subroutine read_transop_rixs_f(folder)
     integer :: num
     integer :: ierror
     real(dp) :: rdum1, rdum2
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     if (present(folder)) then
         folder_ = folder

@@ -47,10 +47,10 @@ subroutine ed_driver(folder)
     complex(dp), allocatable :: eigvecs(:,:)
     complex(dp), allocatable :: eigvecs_mpi(:)
 
-    character(len=100) :: folder_
-    character(len=100) :: fname
+    character(len=300) :: folder_
+    character(len=300) :: fname
     !character(len=20) :: fname
-    character(len=10) :: char_I
+    character(len=100) :: char_I
 
     !if (present(folder)) then
     !    folder_ = folder

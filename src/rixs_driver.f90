@@ -33,10 +33,10 @@ subroutine rixs_driver(folder)
     complex(dp), allocatable :: phi_vec(:)
     complex(dp), allocatable :: x_vec(:)
 
-    character(len=80) :: folder_
-    character(len=80) :: fname
+    character(len=300) :: folder_
+    character(len=300) :: fname
     !character(len=20) :: fname
-    character(len=10) :: char_I
+    character(len=100) :: char_I
 
     !if (present(folder)) then
     !    folder_ = folder

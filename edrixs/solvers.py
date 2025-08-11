@@ -4438,6 +4438,8 @@ def rixs_siam_fort_fixed(comm, shell_name, nbath, norb_bath, ominc, eloss, *, ga
         ntot_v_baths = norb_bath * nbath
         constrained_basis = True
 
+    print(folder)
+
     if rank == 0:
         print("edrixs >>> Running RIXS ...", flush=True)
         if (constrained_basis):

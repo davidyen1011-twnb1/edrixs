@@ -15,7 +15,7 @@ subroutine ed_fsolver(comm, my_id, num_procs, folder)
     integer :: ierror
     integer :: color
     integer :: key
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     !if (present(folder)) then
     !    folder_ = folder
@@ -86,7 +86,7 @@ subroutine ed_fsolver_intermediate(comm, my_id, num_procs, folder)
     integer :: ierror
     integer :: color
     integer :: key
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     !if (present(folder)) then
     !    folder_ = folder
@@ -160,7 +160,7 @@ subroutine xas_fsolver(comm, my_id, num_procs, folder)
     integer :: key
     integer :: min_dim
     
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     !if (present(folder)) then
     !    folder_ = folder
@@ -236,7 +236,7 @@ subroutine rixs_fsolver(comm, my_id, num_procs, folder)
     integer :: key
     integer :: min_dim
     
-    character(len=50) :: folder_
+    character(len=300) :: folder_
 
     !if (present(folder)) then
     !    folder_ = folder
